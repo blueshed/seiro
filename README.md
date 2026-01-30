@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Seiro" width="200" />
+  <img src="logo.png" alt="Seiro" width="480" />
 </p>
 
 # Seiro Monorepo
