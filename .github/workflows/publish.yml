@@ -1,0 +1,86 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'           # seiro package: v0.1.0, v1.0.0, etc.
+      - 'create-v*'    # create-seiro package: create-v0.1.0, etc.
+
+jobs:
+  publish-seiro:
+    if: startsWith(github.ref, 'refs/tags/v') && !startsWith(github.ref, 'refs/tags/create-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: cd packages/seiro && bun install
+
+      - name: Build
+        run: cd packages/seiro && bun run build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update package version
+        run: |
+          cd packages/seiro
+          jq '.version = "${{ steps.version.outputs.version }}"' package.json > tmp.json
+          mv tmp.json package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish seiro
+        run: cd packages/seiro && npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-create-seiro:
+    if: startsWith(github.ref, 'refs/tags/create-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/create-v}" >> $GITHUB_OUTPUT
+
+      - name: Update package version
+        run: |
+          cd packages/create-seiro
+          jq '.version = "${{ steps.version.outputs.version }}"' package.json > tmp.json
+          mv tmp.json package.json
+
+      - name: Update template seiro dependency
+        run: |
+          cd packages/create-seiro/template
+          jq '.dependencies.seiro = "^${{ steps.version.outputs.version }}"' package.json > tmp.json
+          mv tmp.json package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish create-seiro
+        run: cd packages/create-seiro && npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
