@@ -6,6 +6,9 @@
   "bin": {
     "create-seiro": "./index.ts"
   },
+  "scripts": {
+    "test": "bun test --ignore-pattern 'template/**/*'"
+  },
   "files": [
     "index.ts",
     "template"
