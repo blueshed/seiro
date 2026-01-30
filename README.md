@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="Seiro" width="200" />
+</p>
+
 # Seiro Monorepo
 
 CQRS over WebSocket with Bun and Preact Signals.

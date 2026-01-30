@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+  },
+  "include": [
+    "packages/seiro/src/**/*.ts",
+    "packages/create-seiro/**/*.ts",
+    "example/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "template",
+    "packages/create-seiro/template",
+    "packages/seiro/dist",
+  ],
+}
