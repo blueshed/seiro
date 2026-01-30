@@ -27,3 +27,6 @@ jobs:
 
       - name: Type check example
         run: cd example && bun run check
+
+      - name: Test create-seiro
+        run: cd packages/create-seiro && bun test
