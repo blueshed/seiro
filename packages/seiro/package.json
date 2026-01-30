@@ -1,6 +1,6 @@
 {
   "name": "seiro",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CQRS over WebSocket with Bun and Preact Signals",
   "type": "module",
   "main": "./dist/index.js",
