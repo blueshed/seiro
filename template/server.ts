@@ -1,6 +1,6 @@
 import postgres from "postgres";
 import { createServer } from "seiro/server";
-import type { Commands, Queries, Events } from "./types";
+import homepage from "./index.html";
 import * as auth from "./auth/server";
 
 const DATABASE_URL =
@@ -8,7 +8,7 @@ const DATABASE_URL =
 
 const sql = postgres(DATABASE_URL);
 
-const server = createServer<Commands, Queries, Events>({
+const server = createServer({
   port: 3000,
   auth: {
     verify: auth.verifyToken,
@@ -23,22 +23,7 @@ const server = createServer<Commands, Queries, Events>({
 // Register auth handlers
 auth.register(server, sql);
 
-// Serve static files and start
-const indexHtml = await Bun.file("index.html").text();
+const app = await server.start({ "/": homepage });
 
-await server.start({
-  "/": new Response(indexHtml, {
-    headers: { "Content-Type": "text/html" },
-  }),
-  "/app.js": async () => {
-    const result = await Bun.build({
-      entrypoints: ["./app.ts"],
-      minify: false,
-    });
-    return new Response(result.outputs[0], {
-      headers: { "Content-Type": "application/javascript" },
-    });
-  },
-});
-
-console.log("Server running on http://localhost:3000");
+console.log(`Server running at ${app.url}`);
+console.log(`WebSocket at ws://localhost:3000/ws`);
