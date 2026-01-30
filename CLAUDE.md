@@ -64,6 +64,11 @@ Packages are published via GitHub Actions using trusted publishing (OIDC). No np
    git push origin main --tags
    ```
 
+5. Clear local bun cache (so `bunx create-seiro` fetches the new version):
+   ```bash
+   rm -rf ~/.bun/install/cache/create-seiro*
+   ```
+
 ### Keeping in sync
 
 The `/template` directory is the source of truth. When making changes:
