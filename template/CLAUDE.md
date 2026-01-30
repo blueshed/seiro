@@ -11,9 +11,9 @@ bun run check          # typecheck
 bun test               # run tests
 ```
 
-## Adding Entities
+## Adding Features
 
-Use the new-entity skill to add new entities with proper types and handlers.
+Use the `cqrs-document` skill for document-first CQRS design through conversation.
 
 ## Type Patterns
 

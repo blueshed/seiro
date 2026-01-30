@@ -76,6 +76,5 @@ The `/example` directory is separate - it includes shipments domain as a referen
 
 ## Adding Features
 
-Use Claude skills in `template/.claude/skills/`:
-- `new-entity.md` - Add new entity with types, SQL, handlers
-- `entity-ui.md` - Add UI components for entities
+Use Claude skill in `template/.claude/skills/`:
+- `cqrs-document` - Document-first CQRS design through conversation

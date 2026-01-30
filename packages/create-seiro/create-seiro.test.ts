@@ -40,7 +40,7 @@ test("create-seiro scaffolds a new project", async () => {
   expect(files).toContain("init_db/01_extensions.sql");
   expect(files).toContain("init_db/02_auth_tables.sql");
   expect(files).toContain("init_db/03_auth_functions.sql");
-  expect(files).toContain(".claude/skills/new-entity.md");
+  expect(files).toContain(".claude/skills/cqrs-document/SKILL.md");
 });
 
 test("scaffolded project has correct package name", async () => {

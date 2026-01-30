@@ -9,7 +9,8 @@
   "scripts": {
     "build": "bun run --filter=seiro build",
     "check": "bun run --filter=* check",
-    "test": "bun run --filter=* test"
+    "test": "bun run --filter=create-seiro test",
+    "test:example": "bun run --filter=seiro-example test"
   },
   "devDependencies": {
     "@types/bun": "^1.3.8"

@@ -16,12 +16,15 @@ beforeAll(async () => {
   // Wait for server to be ready
   await new Promise((r) => setTimeout(r, 500));
 
-  client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws");
+  client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws", {
+    tokenKey: "seiro_token_unauthed",
+  });
   await client.connect<User>();
 
   // Create authenticated client
   authedClient = createClient<Commands, Queries, Events>(
     "ws://localhost:3000/ws",
+    { tokenKey: "seiro_token_authed" },
   );
   await authedClient.connect<User>();
 
@@ -130,9 +133,17 @@ test("login with invalid credentials fails", async () => {
 
 // Shipment tests
 test("create shipment requires authentication", async () => {
+  // Create a fresh unauthenticated client (not reusing `client` which may have
+  // been authenticated by previous auth tests via ctx.setUserId)
+  const unauthClient = createClient<Commands, Queries, Events>(
+    "ws://localhost:3000/ws",
+    { tokenKey: "seiro_token_fresh" },
+  );
+  await unauthClient.connect<User>();
+
   let error: string | null = null;
 
-  client.cmd(
+  unauthClient.cmd(
     "shipment.create",
     { origin: "AMS", dest: "LAX" },
     {
@@ -143,6 +154,8 @@ test("create shipment requires authentication", async () => {
   );
 
   await new Promise((r) => setTimeout(r, 300));
+
+  unauthClient.close();
 
   expect(error).not.toBeNull();
   expect(error!).toContain("authenticated");
