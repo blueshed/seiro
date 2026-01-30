@@ -66,7 +66,7 @@ Packages are published via GitHub Actions using trusted publishing (OIDC). No np
 
 5. Clear local bun cache (so `bunx create-seiro` fetches the new version):
    ```bash
-   rm -rf ~/.bun/install/cache/create-seiro*
+   bun pm cache rm
    ```
 
 ### Keeping in sync
