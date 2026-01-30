@@ -1,0 +1,129 @@
+import { expect, test, beforeAll, afterAll } from "bun:test";
+import { createClient } from "seiro/client";
+import type { Commands, Queries, Events, User } from "./types";
+
+const DATABASE_URL = "postgres://seiro:seiro@localhost:5433/seiro_test";
+process.env.DATABASE_URL = DATABASE_URL;
+
+// Dynamic import to use test database
+const serverModule = await import("./server");
+
+type TestClient = ReturnType<typeof createClient<Commands, Queries, Events>>;
+let client: TestClient;
+
+beforeAll(async () => {
+  // Wait for server to be ready
+  await new Promise((r) => setTimeout(r, 500));
+
+  client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws");
+  await client.connect<User>();
+});
+
+afterAll(() => {
+  client.close();
+});
+
+test("register creates user and returns token", async () => {
+  const email = `test-${Date.now()}@example.com`;
+  let result: { token: string; user: User } | null = null;
+  let error: string | null = null;
+
+  client.cmd(
+    "auth.register",
+    { email, password: "password123" },
+    {
+      onSuccess: (r) => {
+        result = r;
+      },
+      onError: (e) => {
+        error = e;
+      },
+    },
+  );
+
+  await new Promise((r) => setTimeout(r, 300));
+
+  expect(error).toBeNull();
+  expect(result).not.toBeNull();
+  expect(result!.token).toBeDefined();
+  expect(result!.user.email).toBe(email);
+});
+
+test("login with valid credentials returns token", async () => {
+  const email = `login-${Date.now()}@example.com`;
+
+  // First register
+  await new Promise<void>((resolve) => {
+    client.cmd(
+      "auth.register",
+      { email, password: "password123" },
+      { onSuccess: () => resolve() },
+    );
+  });
+
+  // Then login
+  let result: { token: string; user: User } | null = null;
+  client.cmd(
+    "auth.login",
+    { email, password: "password123" },
+    {
+      onSuccess: (r) => {
+        result = r;
+      },
+    },
+  );
+
+  await new Promise((r) => setTimeout(r, 300));
+
+  expect(result).not.toBeNull();
+  expect(result!.token).toBeDefined();
+  expect(result!.user.email).toBe(email);
+});
+
+test("login with invalid credentials fails", async () => {
+  let error: string | null = null;
+
+  client.cmd(
+    "auth.login",
+    { email: "nonexistent@example.com", password: "wrong" },
+    {
+      onError: (e) => {
+        error = e;
+      },
+    },
+  );
+
+  await new Promise((r) => setTimeout(r, 300));
+
+  expect(error).not.toBeNull();
+});
+
+test("duplicate registration fails", async () => {
+  const email = `dup-${Date.now()}@example.com`;
+
+  // First registration
+  await new Promise<void>((resolve) => {
+    client.cmd(
+      "auth.register",
+      { email, password: "password123" },
+      { onSuccess: () => resolve() },
+    );
+  });
+
+  // Second registration should fail
+  let error: string | null = null;
+  client.cmd(
+    "auth.register",
+    { email, password: "password123" },
+    {
+      onError: (e) => {
+        error = e;
+      },
+    },
+  );
+
+  await new Promise((r) => setTimeout(r, 300));
+
+  expect(error).not.toBeNull();
+  expect(error!).toContain("already registered");
+});

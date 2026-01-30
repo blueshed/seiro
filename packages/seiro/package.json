@@ -1,0 +1,62 @@
+{
+  "name": "seiro",
+  "version": "0.1.0",
+  "description": "CQRS over WebSocket with Bun and Preact Signals",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol.d.ts",
+      "import": "./dist/protocol.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build ./src/index.ts ./src/client.ts ./src/server.ts ./src/protocol.ts --outdir=dist --target=bun --format=esm --splitting",
+    "build:types": "tsc --project tsconfig.build.json",
+    "prepublishOnly": "bun run build"
+  },
+  "peerDependencies": {
+    "@preact/signals-core": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@preact/signals-core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@preact/signals-core": "^1.12.2",
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "cqrs",
+    "websocket",
+    "bun",
+    "preact",
+    "signals"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blueshed/seiro.git",
+    "directory": "packages/seiro"
+  }
+}

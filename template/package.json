@@ -1,0 +1,21 @@
+{
+  "name": "my-seiro-app",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot server.ts",
+    "check": "tsc --noEmit",
+    "db": "docker compose down -v && docker compose up -d",
+    "down": "docker compose down -v",
+    "test": "bun test server.test.ts"
+  },
+  "dependencies": {
+    "seiro": "^0.1.0",
+    "@preact/signals-core": "^1.12.2",
+    "postgres": "^3.4.8"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}

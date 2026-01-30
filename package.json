@@ -1,0 +1,14 @@
+{
+  "name": "seiro-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "template",
+    "example"
+  ],
+  "scripts": {
+    "build": "bun run --filter=seiro build",
+    "check": "bun run --filter=* check",
+    "test": "bun run --filter=* test"
+  }
+}

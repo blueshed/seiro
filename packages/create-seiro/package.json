@@ -1,0 +1,26 @@
+{
+  "name": "create-seiro",
+  "version": "0.1.0",
+  "description": "Scaffold a new Seiro project",
+  "type": "module",
+  "bin": {
+    "create-seiro": "./index.ts"
+  },
+  "files": [
+    "index.ts",
+    "template"
+  ],
+  "keywords": [
+    "seiro",
+    "scaffold",
+    "cli",
+    "cqrs",
+    "websocket"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blueshed/seiro.git",
+    "directory": "packages/create-seiro"
+  }
+}
