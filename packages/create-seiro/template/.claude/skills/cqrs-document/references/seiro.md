@@ -74,7 +74,7 @@ const server = createServer({
 
 // Register domain handlers
 auth.register(server, sql);
-entity.register(server, sql);
+await entity.register(server, sql, listener);  // with pg_notify listener
 
 await server.start({ "/": homepage });
 ```
@@ -86,21 +86,26 @@ import type { Sql } from "postgres";
 import type { Server } from "seiro";
 import type { Entity, EntityCommands, EntityQueries, EntityEvents } from "./types";
 
-export function register<
+// Channels for pg_notify events
+const channels = ["entity_created", "entity_updated"] as const;
+
+export async function register<
   C extends EntityCommands,
   Q extends EntityQueries,
   E extends EntityEvents,
->(server: Server<C, Q, E>, sql: Sql) {
-
-  // Send profile on connect (auth example)
-  server.onOpen(async (ctx) => {
-    if (!ctx.userId) {
-      ctx.send({ profile: null });
-      return;
+>(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
+  // Listen to postgres notifications (if listener provided)
+  if (listener) {
+    for (const channel of channels) {
+      await listener.listen(channel, (payload: string) => {
+        try {
+          server.emit(channel, JSON.parse(payload) as Entity);
+        } catch {
+          // ignore malformed payloads
+        }
+      });
     }
-    // fetch and send user profile
-    ctx.send({ profile: user });
-  });
+  }
 
   // Command with typed result
   server.command("entity.save", async (data, ctx) => {
@@ -122,9 +127,6 @@ export function register<
     }
   });
 }
-
-// Broadcast events from server
-server.emit("entity_created", entity);
 ```
 
 ## Client Setup

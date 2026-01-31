@@ -7,11 +7,29 @@ import type {
   ShipmentEvents,
 } from "./types";
 
-export function register<
+const channels = [
+  "shipment_created",
+  "shipment_claimed",
+  "shipment_delivered",
+] as const;
+
+export async function register<
   C extends ShipmentCommands,
   Q extends ShipmentQueries,
   E extends ShipmentEvents,
->(server: Server<C, Q, E>, sql: Sql) {
+>(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
+  // Listen to postgres notifications
+  if (listener) {
+    for (const channel of channels) {
+      await listener.listen(channel, (payload: string) => {
+        try {
+          server.emit(channel, JSON.parse(payload) as Shipment);
+        } catch {
+          // ignore malformed payloads
+        }
+      });
+    }
+  }
   // Commands
 
   server.command("shipment.create", async (data, ctx) => {
@@ -61,9 +79,3 @@ export function register<
     }
   });
 }
-
-export const channels = [
-  "shipment_created",
-  "shipment_claimed",
-  "shipment_delivered",
-] as const;

@@ -1,12 +1,9 @@
 import postgres from "postgres";
 import { createServer } from "seiro/server";
 import homepage from "./index.html";
-import {
-  register as registerShipment,
-  channels as shipmentChannels,
-} from "./shipment/server";
+import { register as registerShipment } from "./shipment/server";
 import { register as registerAuth, verifyToken } from "./auth/server";
-import type { Commands, Queries, Events, Shipment } from "./types";
+import type { Commands, Queries, Events } from "./types";
 
 const DATABASE_URL =
   process.env.DATABASE_URL ?? "postgres://seiro:seiro@localhost:5432/seiro";
@@ -26,18 +23,7 @@ const server = createServer<Commands, Queries, Events>({
 });
 
 registerAuth(server, sql);
-registerShipment(server, sql);
-
-// Listen to postgres notifications - shipments
-for (const channel of shipmentChannels) {
-  await listener.listen(channel, (payload: string) => {
-    try {
-      server.emit(channel, JSON.parse(payload) as Shipment);
-    } catch {
-      // ignore malformed payloads
-    }
-  });
-}
+await registerShipment(server, sql, listener);
 
 const app = await server.start({ "/": homepage });
 
