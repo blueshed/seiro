@@ -1,6 +1,21 @@
 import type { ServerWebSocket } from "bun";
 import { isCmd, isQuery, encode, decode } from "./protocol";
 import { serverLogger, logWsAccess } from "./logger";
+
+// Re-export logger utilities for consumers
+export {
+  createLogger,
+  serverLogger,
+  dbLogger,
+  authLogger,
+  wsLogger,
+  notifyLogger,
+  accessLogger,
+  runtimeLogger,
+  logAccess,
+  logWsAccess,
+  type Logger,
+} from "./logger";
 import type {
   CommandsDef,
   QueriesDef,
@@ -162,7 +177,8 @@ export function createServer<
         };
         const result = await handler(msg.data as CommandData<C, keyof C>, ctx);
         if (msg.ack) {
-          ws.send(encode({ cid: msg.cid, result }));
+          // Use null instead of undefined so it survives JSON serialization
+          ws.send(encode({ cid: msg.cid, result: result ?? null }));
         }
         logWsAccess("CMD", msg.cmd, Date.now() - start, ws.data.userId);
       } catch (e) {

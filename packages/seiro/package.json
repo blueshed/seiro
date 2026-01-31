@@ -1,6 +1,6 @@
 {
   "name": "seiro",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "CQRS over WebSocket with Bun and Preact Signals",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,12 +26,14 @@
   "files": [
     "dist",
     "src",
-    "CLAUDE.md"
+    "CLAUDE.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "bun run build:js && bun run build:types",
     "build:js": "bun build ./src/index.ts ./src/client.ts ./src/server.ts ./src/protocol.ts --outdir=dist --target=bun --format=esm --splitting",
     "build:types": "tsc --project tsconfig.build.json",
+    "test": "bun test",
     "prepublishOnly": "bun run build"
   },
   "peerDependencies": {
