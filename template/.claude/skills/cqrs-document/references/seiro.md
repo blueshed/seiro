@@ -279,10 +279,73 @@ RETURNS SETOF jsonb AS $$
 $$ LANGUAGE sql;
 ```
 
+## Streaming Queries
+
+Queries stream rows over the WebSocket - each row is sent as soon as the server yields it, and the client can process rows as they arrive.
+
+### How It Works
+
+**Server:** Each `yield` sends a message immediately:
+
+```typescript
+server.query("logs.recent", async function* (params, ctx) {
+  const rows = await sql`SELECT * FROM logs LIMIT 1000`;
+  for (const row of rows) {
+    yield row;  // sent to client immediately
+  }
+});
+```
+
+**Wire:** Rows stream as individual messages:
+
+```
+→ { q: "logs.recent", id: 1, params: {} }
+← { id: 1, row: { id: 1, message: "..." } }   // immediate
+← { id: 1, row: { id: 2, message: "..." } }   // immediate
+← { id: 1, row: { id: 3, message: "..." } }   // immediate
+...
+← { id: 1 }                                    // end marker
+```
+
+**Client:** Process rows as they arrive:
+
+```typescript
+// Streaming - handle each row immediately
+for await (const row of client.query("logs.recent")) {
+  appendToUI(row);  // renders while more rows are coming
+}
+
+// Or collect all (waits for stream to complete)
+const all = await client.queryAll("logs.recent");
+```
+
+### Use Cases
+
+- **Large datasets:** Render first results while fetching more
+- **Progress feedback:** Show items appearing one by one
+- **Memory efficiency:** Process rows without holding all in memory
+- **Responsive UI:** User sees data immediately, not after full load
+
+### True End-to-End Streaming
+
+The example above streams WebSocket delivery, but SQL fetches all rows first. For true streaming from database to client, use cursors:
+
+```typescript
+server.query("logs.stream", async function* (params, ctx) {
+  // Cursor-based streaming from postgres
+  const cursor = sql`SELECT * FROM logs`.cursor(100);
+  for await (const rows of cursor) {
+    for (const row of rows) {
+      yield row;
+    }
+  }
+});
+```
+
 ## Conventions
 
 - Commands return `{ id }` for create/save operations
-- Queries stream rows, end with empty `{ id }`
+- Queries stream rows - each `yield` sends immediately, end with empty `{ id }`
 - Use typed SQL: `sql<[{ result: Type }]>` or `sql<{ fn_name: Type }[]>`
 - Events broadcast full data via pg_notify
 - Pattern subscriptions support wildcards: `entity_*`
