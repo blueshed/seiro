@@ -100,8 +100,8 @@ export async function register<
       await listener.listen(channel, (payload: string) => {
         try {
           server.emit(channel, JSON.parse(payload) as Entity);
-        } catch {
-          // ignore malformed payloads
+        } catch (e) {
+          console.error(`Failed to parse ${channel} payload:`, payload, e);
         }
       });
     }
