@@ -1,29 +1,34 @@
 import { expect, test, beforeAll, afterAll } from "bun:test";
+import { $ } from "bun";
 import { createClient } from "seiro/client";
 import type { Commands, Queries, Events, User, Shipment } from "./types";
 
 const DATABASE_URL = "postgres://seiro:seiro@localhost:5433/seiro_test";
 process.env.DATABASE_URL = DATABASE_URL;
-
-// Dynamic import to use test database
-const serverModule = await import("./server");
+process.env.PORT = "3001";
 
 type TestClient = ReturnType<typeof createClient<Commands, Queries, Events>>;
 let client: TestClient;
 let authedClient: TestClient;
 
 beforeAll(async () => {
+  // Start test database
+  await $`docker compose -f compose.test.yml up -d --wait`.quiet();
+
+  // Dynamic import to use test database
+  await import("./server");
+
   // Wait for server to be ready
   await new Promise((r) => setTimeout(r, 500));
 
-  client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws", {
+  client = createClient<Commands, Queries, Events>("ws://localhost:3001/ws", {
     tokenKey: "seiro_token_unauthed",
   });
   await client.connect<User>();
 
   // Create authenticated client
   authedClient = createClient<Commands, Queries, Events>(
-    "ws://localhost:3000/ws",
+    "ws://localhost:3001/ws",
     { tokenKey: "seiro_token_authed" },
   );
   await authedClient.connect<User>();
@@ -50,9 +55,11 @@ beforeAll(async () => {
   await authedClient.reconnect();
 });
 
-afterAll(() => {
+afterAll(async () => {
   client.close();
   authedClient.close();
+  // Stop test database
+  await $`docker compose -f compose.test.yml down -v`.quiet();
 });
 
 // Auth tests
@@ -136,7 +143,7 @@ test("create shipment requires authentication", async () => {
   // Create a fresh unauthenticated client (not reusing `client` which may have
   // been authenticated by previous auth tests via ctx.setUserId)
   const unauthClient = createClient<Commands, Queries, Events>(
-    "ws://localhost:3000/ws",
+    "ws://localhost:3001/ws",
     { tokenKey: "seiro_token_fresh" },
   );
   await unauthClient.connect<User>();

@@ -1,26 +1,33 @@
 import { expect, test, beforeAll, afterAll } from "bun:test";
+import { $ } from "bun";
 import { createClient } from "seiro/client";
 import type { Commands, Queries, Events, User } from "./types";
 
 const DATABASE_URL = "postgres://seiro:seiro@localhost:5433/seiro_test";
 process.env.DATABASE_URL = DATABASE_URL;
-
-// Dynamic import to use test database
-const serverModule = await import("./server");
+process.env.PORT = "3001";
 
 type TestClient = ReturnType<typeof createClient<Commands, Queries, Events>>;
 let client: TestClient;
 
 beforeAll(async () => {
+  // Start test database
+  await $`docker compose -f compose.test.yml up -d --wait`.quiet();
+
+  // Dynamic import to use test database
+  await import("./server");
+
   // Wait for server to be ready
   await new Promise((r) => setTimeout(r, 500));
 
-  client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws");
+  client = createClient<Commands, Queries, Events>("ws://localhost:3001/ws");
   await client.connect<User>();
 });
 
-afterAll(() => {
+afterAll(async () => {
   client.close();
+  // Stop test database
+  await $`docker compose -f compose.test.yml down -v`.quiet();
 });
 
 test("register creates user and returns token", async () => {

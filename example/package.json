@@ -7,7 +7,7 @@
     "check": "tsc --noEmit",
     "db": "docker compose down -v && docker compose up -d",
     "down": "docker compose down -v",
-    "test": "docker compose -f compose.test.yml up -d --wait && bun test server.test.ts; docker compose -f compose.test.yml down -v"
+    "test": "bun test server.test.ts"
   },
   "dependencies": {
     "seiro": "workspace:*",

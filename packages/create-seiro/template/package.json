@@ -10,7 +10,7 @@
     "test": "bun test server.test.ts"
   },
   "dependencies": {
-    "seiro": "^0.1.5",
+    "seiro": "^0.1.6",
     "@preact/signals-core": "^1.12.2",
     "postgres": "^3.4.8"
   },

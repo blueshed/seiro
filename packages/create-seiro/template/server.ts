@@ -5,11 +5,12 @@ import * as auth from "./auth/server";
 
 const DATABASE_URL =
   process.env.DATABASE_URL ?? "postgres://seiro:seiro@localhost:5432/seiro";
+const PORT = parseInt(process.env.PORT ?? "3000", 10);
 
 const sql = postgres(DATABASE_URL);
 
 const server = createServer({
-  port: 3000,
+  port: PORT,
   auth: {
     verify: auth.verifyToken,
     public: ["auth.register", "auth.login"],
@@ -26,4 +27,4 @@ auth.register(server, sql);
 const app = await server.start({ "/": homepage });
 
 console.log(`Server running at ${app.url}`);
-console.log(`WebSocket at ws://localhost:3000/ws`);
+console.log(`WebSocket at ws://localhost:${PORT}/ws`);
