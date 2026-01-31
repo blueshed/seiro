@@ -1,6 +1,6 @@
 {
   "name": "create-seiro",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Scaffold a new Seiro project",
   "type": "module",
   "bin": {
