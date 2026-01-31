@@ -183,13 +183,14 @@ export function createClient<
     },
   ) {
     const id = cid();
-    if (callbacks) {
+    const ack = callbacks !== undefined;
+    if (ack) {
       cmdListeners.set(id, {
         onSuccess: callbacks.onSuccess as (result: unknown) => void,
         onError: callbacks.onError,
       });
     }
-    send({ cmd: name, cid: id, data });
+    send({ cmd: name, cid: id, data, ack });
   }
 
   function query<K extends keyof Q & string>(

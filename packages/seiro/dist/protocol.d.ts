@@ -2,6 +2,7 @@ export type Cmd = {
     cmd: string;
     cid: string;
     data: object;
+    ack?: boolean;
 };
 export type CmdError = {
     cid: string;

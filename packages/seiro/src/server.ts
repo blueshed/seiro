@@ -161,7 +161,7 @@ export function createServer<
           send: (event, data) => sendToClient(ws, event, data as E[keyof E]),
         };
         const result = await handler(msg.data as CommandData<C, keyof C>, ctx);
-        if (result !== undefined) {
+        if (msg.ack) {
           ws.send(encode({ cid: msg.cid, result }));
         }
         logWsAccess("CMD", msg.cmd, Date.now() - start, ws.data.userId);

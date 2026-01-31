@@ -67,11 +67,14 @@ const client = createClient<Commands, Queries, Events>("ws://localhost:3000/ws")
 
 await client.connect();
 
-// Send command
+// Send command with callbacks (server sends response)
 client.cmd("user.create", { name: "Alice" }, {
   onSuccess: (result) => console.log("Created:", result.id),
   onError: (err) => console.error("Failed:", err),
 });
+
+// Fire-and-forget command (no callbacks, no response)
+client.cmd("analytics.track", { event: "signup" });
 
 // Query with streaming
 for await (const user of client.query("users.all")) {

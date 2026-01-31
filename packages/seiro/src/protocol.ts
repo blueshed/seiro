@@ -7,6 +7,7 @@ export type Cmd = {
   cmd: string;
   cid: string;
   data: object;
+  ack?: boolean;
 };
 
 // Command Error: server → client (only on failure)

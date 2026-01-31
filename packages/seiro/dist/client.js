@@ -4,7 +4,7 @@ import {
   createClient,
   d,
   w
-} from "./index-k4gxf42b.js";
+} from "./index-04xfdvx9.js";
 import"./index-txbk53zc.js";
 export {
   d as signal,
