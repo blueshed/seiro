@@ -47,6 +47,7 @@ export type EntityQueries = {
 export type EntityEvents = {
   entity_created: Entity;
   entity_updated: Entity;
+  entity_deleted: { id: number };  // different payload type
 };
 ```
 
@@ -86,9 +87,6 @@ import type { Sql } from "postgres";
 import type { Server } from "seiro";
 import type { Entity, EntityCommands, EntityQueries, EntityEvents } from "./types";
 
-// Channels for pg_notify events
-const channels = ["entity_created", "entity_updated"] as const;
-
 export async function register<
   C extends EntityCommands,
   Q extends EntityQueries,
@@ -96,15 +94,30 @@ export async function register<
 >(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
   // Listen to postgres notifications (if listener provided)
   if (listener) {
-    for (const channel of channels) {
-      await listener.listen(channel, (payload: string) => {
-        try {
-          server.emit(channel, JSON.parse(payload) as Entity);
-        } catch (e) {
-          console.error(`Failed to parse ${channel} payload:`, payload, e);
-        }
-      });
-    }
+    await listener.listen("entity_created", (payload: string) => {
+      try {
+        server.emit("entity_created", JSON.parse(payload) as Entity);
+      } catch (e) {
+        console.error("Failed to parse entity_created payload:", payload, e);
+      }
+    });
+
+    await listener.listen("entity_updated", (payload: string) => {
+      try {
+        server.emit("entity_updated", JSON.parse(payload) as Entity);
+      } catch (e) {
+        console.error("Failed to parse entity_updated payload:", payload, e);
+      }
+    });
+
+    // Different payload type for delete - just the id
+    await listener.listen("entity_deleted", (payload: string) => {
+      try {
+        server.emit("entity_deleted", JSON.parse(payload) as { id: number });
+      } catch (e) {
+        console.error("Failed to parse entity_deleted payload:", payload, e);
+      }
+    });
   }
 
   // Command with typed result
