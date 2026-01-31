@@ -1,5 +1,6 @@
 import type { Sql } from "postgres";
 import type { Server } from "seiro";
+import { notifyLogger } from "seiro/server";
 import type {
   Shipment,
   ShipmentCommands,
@@ -28,10 +29,10 @@ export async function register<
           try {
             server.emit(channel, JSON.parse(payload) as Shipment);
           } catch (e) {
-            console.error(`Failed to parse ${channel} payload:`, payload, e);
+            notifyLogger.error(`Failed to parse ${channel} payload:`, payload, e);
           }
         },
-        () => console.log(`Listening on ${channel}`),
+        () => notifyLogger.info(`Listening on ${channel}`),
       );
     }
   }

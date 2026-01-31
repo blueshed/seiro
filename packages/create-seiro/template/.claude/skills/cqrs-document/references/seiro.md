@@ -87,6 +87,7 @@ await server.start({ "/": homepage });
 ```typescript
 import type { Sql } from "postgres";
 import type { Server } from "seiro";
+import { notifyLogger } from "seiro/server";
 import type { Entity, EntityCommands, EntityQueries, EntityEvents } from "./types";
 
 export async function register<
@@ -103,10 +104,10 @@ export async function register<
         try {
           server.emit("entity_created", JSON.parse(payload) as Entity);
         } catch (e) {
-          console.error("Failed to parse entity_created payload:", payload, e);
+          notifyLogger.error("Failed to parse entity_created payload:", payload, e);
         }
       },
-      () => console.log("Listening on entity_created"),
+      () => notifyLogger.info("Listening on entity_created"),
     );
 
     await listener.listen(
@@ -115,10 +116,10 @@ export async function register<
         try {
           server.emit("entity_updated", JSON.parse(payload) as Entity);
         } catch (e) {
-          console.error("Failed to parse entity_updated payload:", payload, e);
+          notifyLogger.error("Failed to parse entity_updated payload:", payload, e);
         }
       },
-      () => console.log("Listening on entity_updated"),
+      () => notifyLogger.info("Listening on entity_updated"),
     );
 
     // Different payload type for delete - just the id
@@ -128,10 +129,10 @@ export async function register<
         try {
           server.emit("entity_deleted", JSON.parse(payload) as { id: number });
         } catch (e) {
-          console.error("Failed to parse entity_deleted payload:", payload, e);
+          notifyLogger.error("Failed to parse entity_deleted payload:", payload, e);
         }
       },
-      () => console.log("Listening on entity_deleted"),
+      () => notifyLogger.info("Listening on entity_deleted"),
     );
   }
 
