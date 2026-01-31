@@ -7,9 +7,9 @@ CQRS over WebSocket with Bun + Preact Signals + Web Components.
 ```
 ← { profile }               sent on connect (User or null)
 
-→ { cmd, cid, data }        command request
-← { cid, result }           command success
-← { cid, err }              command error
+→ { cmd, cid, data, ack? }  command request (ack=true requests response)
+← { cid, result }           command success (only if ack was true)
+← { cid, err }              command error (always sent on failure)
 
 → { q, id, params }         query request
 ← { id, row }               query row (repeated)
@@ -21,6 +21,8 @@ CQRS over WebSocket with Bun + Preact Signals + Web Components.
 → { sub: "pattern" }        subscribe to events
 → { unsub: "pattern" }      unsubscribe
 ```
+
+The `ack` flag controls whether the server sends a success response. When `ack: true`, the server sends `{ cid, result }` on completion. When `ack` is absent or false, no success response is sent (fire-and-forget). Error responses are always sent regardless of `ack`.
 
 ## Type Definitions
 
@@ -93,31 +95,44 @@ export async function register<
   E extends EntityEvents,
 >(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
   // Listen to postgres notifications (if listener provided)
+  // The 3rd callback is called on connect AND reconnect - postgres.js handles reconnection internally
   if (listener) {
-    await listener.listen("entity_created", (payload: string) => {
-      try {
-        server.emit("entity_created", JSON.parse(payload) as Entity);
-      } catch (e) {
-        console.error("Failed to parse entity_created payload:", payload, e);
-      }
-    });
+    await listener.listen(
+      "entity_created",
+      (payload: string) => {
+        try {
+          server.emit("entity_created", JSON.parse(payload) as Entity);
+        } catch (e) {
+          console.error("Failed to parse entity_created payload:", payload, e);
+        }
+      },
+      () => console.log("Listening on entity_created"),
+    );
 
-    await listener.listen("entity_updated", (payload: string) => {
-      try {
-        server.emit("entity_updated", JSON.parse(payload) as Entity);
-      } catch (e) {
-        console.error("Failed to parse entity_updated payload:", payload, e);
-      }
-    });
+    await listener.listen(
+      "entity_updated",
+      (payload: string) => {
+        try {
+          server.emit("entity_updated", JSON.parse(payload) as Entity);
+        } catch (e) {
+          console.error("Failed to parse entity_updated payload:", payload, e);
+        }
+      },
+      () => console.log("Listening on entity_updated"),
+    );
 
     // Different payload type for delete - just the id
-    await listener.listen("entity_deleted", (payload: string) => {
-      try {
-        server.emit("entity_deleted", JSON.parse(payload) as { id: number });
-      } catch (e) {
-        console.error("Failed to parse entity_deleted payload:", payload, e);
-      }
-    });
+    await listener.listen(
+      "entity_deleted",
+      (payload: string) => {
+        try {
+          server.emit("entity_deleted", JSON.parse(payload) as { id: number });
+        } catch (e) {
+          console.error("Failed to parse entity_deleted payload:", payload, e);
+        }
+      },
+      () => console.log("Listening on entity_deleted"),
+    );
   }
 
   // Command with typed result
@@ -163,11 +178,14 @@ client.subscribe();
 ## Client API
 
 ```typescript
-// Command with callbacks
+// Command with callbacks (sends ack: true, server responds on success)
 client.cmd("entity.save", { id: 1, name: "Updated" }, {
   onSuccess: (result) => navigate(`#/entities/${result.id}`),
   onError: (err) => showError(err),
 });
+
+// Fire-and-forget command (no callbacks = no ack, no success response)
+client.cmd("analytics.track", { event: "page_view" });
 
 // Query (async iterator)
 for await (const row of client.query("entities.all")) {
@@ -356,6 +374,29 @@ server.query("logs.stream", async function* (params, ctx) {
   }
 });
 ```
+
+## PostgreSQL Listener Reconnection
+
+LISTEN blocks the connection - if it drops, you need to re-establish subscriptions. The postgres.js library handles this automatically via the `onlisten` callback (third parameter to `sql.listen()`):
+
+```typescript
+await listener.listen(
+  "entity_created",
+  (payload: string) => {
+    // Handle notification
+    server.emit("entity_created", JSON.parse(payload) as Entity);
+  },
+  () => {
+    // Called on initial connect AND on reconnect
+    console.log("Listening on entity_created");
+  },
+);
+```
+
+The `onlisten` callback is useful for:
+- Logging when listeners are active (helpful for debugging)
+- Fetching any missed data after reconnection
+- Re-syncing state with the database
 
 ## Conventions
 

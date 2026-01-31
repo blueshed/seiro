@@ -19,15 +19,20 @@ export async function register<
   E extends ShipmentEvents,
 >(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
   // Listen to postgres notifications
+  // The onlisten callback (3rd param) is called on connect AND reconnect
   if (listener) {
     for (const channel of channels) {
-      await listener.listen(channel, (payload: string) => {
-        try {
-          server.emit(channel, JSON.parse(payload) as Shipment);
-        } catch (e) {
-          console.error(`Failed to parse ${channel} payload:`, payload, e);
-        }
-      });
+      await listener.listen(
+        channel,
+        (payload: string) => {
+          try {
+            server.emit(channel, JSON.parse(payload) as Shipment);
+          } catch (e) {
+            console.error(`Failed to parse ${channel} payload:`, payload, e);
+          }
+        },
+        () => console.log(`Listening on ${channel}`),
+      );
     }
   }
   // Commands
