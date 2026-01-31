@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" fill="#f8fafc" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" letter-spacing="0.05em">
+    seiro
+  </text>
+  <text x="400" y="62" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="12">
+    CQRS over WebSocket
+  </text>
+
+  <!-- Client -->
+  <g transform="translate(80, 110)">
+    <rect x="0" y="0" width="140" height="160" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="28" text-anchor="middle" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600">Signal</text>
+    <text x="70" y="42" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="9">typescript</text>
+    <line x1="20" y1="52" x2="120" y2="52" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">cmd()</text>
+    <text x="70" y="108" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">query()</text>
+    <text x="70" y="134" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">on()</text>
+  </g>
+
+  <!-- Server -->
+  <g transform="translate(330, 110)">
+    <rect x="0" y="0" width="140" height="160" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="28" text-anchor="middle" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600">Bun</text>
+    <text x="70" y="42" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="9">typescript</text>
+    <line x1="20" y1="52" x2="120" y2="52" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">command()</text>
+    <text x="70" y="108" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">query()</text>
+    <text x="70" y="134" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">emit()</text>
+  </g>
+
+  <!-- Database -->
+  <g transform="translate(580, 110)">
+    <rect x="0" y="0" width="140" height="160" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="28" text-anchor="middle" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600">PostgreSQL</text>
+    <text x="70" y="42" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="9">plpgsql</text>
+    <line x1="20" y1="52" x2="120" y2="52" stroke="#334155" stroke-width="1"/>
+    <text x="70" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">cmd_*()</text>
+    <text x="70" y="108" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">query_*()</text>
+    <text x="70" y="134" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="12">pg_notify()</text>
+  </g>
+
+  <!-- Client-Server pills: centered at x=275, width=80 (from 235 to 315) -->
+
+  <!-- CMD: Client → Server (arrow points right) y=165 -->
+  <g filter="url(#glow)">
+    <path d="M244,156 L303,156 L315,165 L303,174 L244,174 A9,9 0 0 1 235,165 A9,9 0 0 1 244,156 Z" fill="#8b5cf6" opacity="0.9"/>
+    <text x="270" y="169" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">CMD</text>
+  </g>
+
+  <!-- QUERY: Bidirectional y=200 -->
+  <g filter="url(#glow)">
+    <path d="M235,200 L247,191 L303,191 L315,200 L303,209 L247,209 Z" fill="#06b6d4" opacity="0.9"/>
+    <text x="275" y="204" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">QUERY</text>
+  </g>
+
+  <!-- EVENT: Server → Client (arrow points left) y=235 -->
+  <g filter="url(#glow)">
+    <path d="M235,235 L247,226 L306,226 A9,9 0 0 1 315,235 A9,9 0 0 1 306,244 L247,244 Z" fill="#22c55e" opacity="0.9"/>
+    <text x="280" y="239" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">EVENT</text>
+  </g>
+
+  <!-- Server-PostgreSQL pills: centered at x=525, width=80 (from 485 to 565) -->
+
+  <!-- SQL: Server → PostgreSQL (arrow points right) y=180 -->
+  <g>
+    <path d="M494,171 L553,171 L565,180 L553,189 L494,189 A9,9 0 0 1 485,180 A9,9 0 0 1 494,171 Z" fill="#f59e0b" opacity="0.9"/>
+    <text x="520" y="184" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">SQL</text>
+  </g>
+
+  <!-- LISTEN: PostgreSQL → Server (arrow points left) y=220 -->
+  <g>
+    <path d="M485,220 L497,211 L556,211 A9,9 0 0 1 565,220 A9,9 0 0 1 556,229 L497,229 Z" fill="#ef4444" opacity="0.9"/>
+    <text x="530" y="224" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">LISTEN</text>
+  </g>
+
+  <!-- Footer badges: 5 × 90px + 4 × 10px gaps = 490px, centered at x=400 → starts at 155 -->
+  <g transform="translate(155, 320)">
+    <rect x="0" y="0" width="90" height="24" rx="12" fill="#22c55e" opacity="0.25"/>
+    <text x="45" y="16" text-anchor="middle" fill="#4ade80" font-family="system-ui, sans-serif" font-size="10">WebSocket</text>
+  </g>
+  <g transform="translate(255, 320)">
+    <rect x="0" y="0" width="90" height="24" rx="12" fill="#8b5cf6" opacity="0.25"/>
+    <text x="45" y="16" text-anchor="middle" fill="#c4b5fd" font-family="system-ui, sans-serif" font-size="10">Type-Safe</text>
+  </g>
+  <g transform="translate(355, 320)">
+    <rect x="0" y="0" width="90" height="24" rx="12" fill="#06b6d4" opacity="0.25"/>
+    <text x="45" y="16" text-anchor="middle" fill="#67e8f9" font-family="system-ui, sans-serif" font-size="10">Streaming</text>
+  </g>
+  <g transform="translate(455, 320)">
+    <rect x="0" y="0" width="90" height="24" rx="12" fill="#f59e0b" opacity="0.25"/>
+    <text x="45" y="16" text-anchor="middle" fill="#fcd34d" font-family="system-ui, sans-serif" font-size="10">Reactive</text>
+  </g>
+  <g transform="translate(555, 320)">
+    <rect x="0" y="0" width="90" height="24" rx="12" fill="#ef4444" opacity="0.25"/>
+    <text x="45" y="16" text-anchor="middle" fill="#fca5a5" font-family="system-ui, sans-serif" font-size="10">Real-time</text>
+  </g>
+</svg>
