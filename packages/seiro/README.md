@@ -122,6 +122,36 @@ type MyEvents = {
 - **Authentication**: Token-based auth with public/private routes
 - **Subscriptions**: Pattern-based event subscriptions
 
+## Domain Modelling CLI
+
+Design your CQRS system with the built-in modelling tool:
+
+```bash
+# Define entities
+bunx seiro model add entity Product "A product in the catalogue"
+bunx seiro model add attribute Product name string
+bunx seiro model add attribute Product price integer
+
+# Define documents (read models)
+bunx seiro model add document Catalogue
+bunx seiro model add doc-entity Catalogue Product
+bunx seiro model add query Catalogue products "SELECT * FROM products"
+
+# Define commands and events
+bunx seiro model add command product.save
+bunx seiro model add command-doc product.save Catalogue
+bunx seiro model add event product_saved product.save
+
+# Visualise with PlantUML diagrams
+bunx seiro model up      # start PlantUML server (Docker)
+bunx seiro model serve   # view diagrams at localhost:3000
+
+# Export for code generation
+bunx seiro model export  # outputs JSON
+```
+
+Run `bunx seiro model --help` for full CLI documentation.
+
 ## License
 
 MIT

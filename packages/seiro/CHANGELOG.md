@@ -2,9 +2,25 @@
 
 All notable changes to seiro will be documented in this file.
 
-## [0.1.9] - Unreleased
+## [0.1.10] - Unreleased
 
 (No changes yet)
+
+## [0.1.9] - 2026-02-01
+
+### Added
+- `seiro model` CLI for CQRS domain modelling
+  - Define entities, documents, commands, events, actors, use cases, sequences
+  - PlantUML diagram generation (entity, use case, sequence, document diagrams)
+  - `seiro model serve` - web UI for viewing diagrams
+  - `seiro model export` - JSON export for code generation
+  - SQLite-based model storage (model.db)
+- New skills for template:
+  - `model-build` - build domain model through conversation using CLI
+  - `model-generate` - generate seiro application from model export
+- Updated template CLAUDE.md with two design paths:
+  - Quick path: `cqrs-document` skill for direct conversation-to-code
+  - Model path: `model-build` → visualise → `model-generate`
 
 ## [0.1.8] - 2026-01-31
 

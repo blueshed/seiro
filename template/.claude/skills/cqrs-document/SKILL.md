@@ -130,6 +130,21 @@ export type Site = {
 - No UML diagrams
 - No abstract entity modelling before documents are clear
 
+## Alternative: seiro model
+
+For larger systems where you want to visualise the complete domain (entities, documents, commands, events, sequences), use `seiro model`:
+
+```bash
+bunx seiro model add entity Product
+bunx seiro model add document Catalogue
+bunx seiro model serve  # view diagrams
+bunx seiro model export # get JSON for code generation
+```
+
+Then use the `model-generate` skill to create the application from the export.
+
+Use this skill (cqrs-document) for conversational design. Use seiro model when you need the full picture and consistency checking across a larger domain.
+
 ## Iteration Pattern
 
 When requirements change:
