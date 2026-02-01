@@ -4,13 +4,7 @@
       <stop offset="0%" style="stop-color:#0f172a"/>
       <stop offset="100%" style="stop-color:#1e293b"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+
   </defs>
 
   <!-- Background -->
@@ -21,7 +15,7 @@
     seiro
   </text>
   <text x="400" y="62" text-anchor="middle" fill="#64748b" font-family="system-ui, sans-serif" font-size="12">
-    CQRS over WebSocket
+    Bun&lt;CQRS&gt;/WebSockets
   </text>
 
   <!-- Client -->
@@ -60,20 +54,20 @@
   <!-- Client-Server pills: centered at x=275, width=80 (from 235 to 315) -->
 
   <!-- CMD: Client → Server (arrow points right) y=165 -->
-  <g filter="url(#glow)">
-    <path d="M244,156 L303,156 L315,165 L303,174 L244,174 A9,9 0 0 1 235,165 A9,9 0 0 1 244,156 Z" fill="#8b5cf6" opacity="0.9"/>
+  <g>
+    <path d="M244,156 L303,156 L315,165 L303,174 L244,174 A9,9 0 0 1 235,165 A9,9 0 0 1 244,156 Z" fill="#8b5cf6"/>
     <text x="270" y="169" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">CMD</text>
   </g>
 
   <!-- QUERY: Bidirectional y=200 -->
-  <g filter="url(#glow)">
-    <path d="M235,200 L247,191 L303,191 L315,200 L303,209 L247,209 Z" fill="#06b6d4" opacity="0.9"/>
+  <g>
+    <path d="M235,200 L247,191 L303,191 L315,200 L303,209 L247,209 Z" fill="#06b6d4"/>
     <text x="275" y="204" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">QUERY</text>
   </g>
 
   <!-- EVENT: Server → Client (arrow points left) y=235 -->
-  <g filter="url(#glow)">
-    <path d="M235,235 L247,226 L306,226 A9,9 0 0 1 315,235 A9,9 0 0 1 306,244 L247,244 Z" fill="#22c55e" opacity="0.9"/>
+  <g>
+    <path d="M235,235 L247,226 L306,226 A9,9 0 0 1 315,235 A9,9 0 0 1 306,244 L247,244 Z" fill="#22c55e"/>
     <text x="280" y="239" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">EVENT</text>
   </g>
 
@@ -81,13 +75,13 @@
 
   <!-- SQL: Server → PostgreSQL (arrow points right) y=180 -->
   <g>
-    <path d="M494,171 L553,171 L565,180 L553,189 L494,189 A9,9 0 0 1 485,180 A9,9 0 0 1 494,171 Z" fill="#f59e0b" opacity="0.9"/>
+    <path d="M494,171 L553,171 L565,180 L553,189 L494,189 A9,9 0 0 1 485,180 A9,9 0 0 1 494,171 Z" fill="#f59e0b"/>
     <text x="520" y="184" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">SQL</text>
   </g>
 
   <!-- LISTEN: PostgreSQL → Server (arrow points left) y=220 -->
   <g>
-    <path d="M485,220 L497,211 L556,211 A9,9 0 0 1 565,220 A9,9 0 0 1 556,229 L497,229 Z" fill="#ef4444" opacity="0.9"/>
+    <path d="M485,220 L497,211 L556,211 A9,9 0 0 1 565,220 A9,9 0 0 1 556,229 L497,229 Z" fill="#ef4444"/>
     <text x="530" y="224" text-anchor="middle" fill="#fff" font-family="monospace" font-size="10" font-weight="600">LISTEN</text>
   </g>
 
