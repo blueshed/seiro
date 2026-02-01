@@ -6,3 +6,7 @@ node_modules/
 # But do ignore other dist folders
 /example/dist/
 /template/dist/
+
+# Model CLI artifacts
+model.db
+.cache/

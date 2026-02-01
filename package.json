@@ -9,8 +9,10 @@
   "scripts": {
     "build": "bun run --filter=seiro build",
     "check": "bun run --filter=* check",
-    "test": "bun run --filter=seiro test && bun run --filter=create-seiro test",
-    "test:example": "bun run --filter=seiro-example test"
+    "test": "bun run --filter=seiro test && bun run --filter=create-seiro test && bun run --filter=@seiro/model test",
+    "test:example": "bun run --filter=seiro-example test",
+    "test:model": "bun run --filter=@seiro/model test",
+    "model": "bun run packages/model/src/cli.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.3.8"

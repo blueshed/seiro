@@ -1,0 +1,63 @@
+{
+  "name": "@seiro/model",
+  "version": "0.1.0",
+  "description": "CQRS domain modeling with stories, entities, documents, commands and events",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "@seiro/model": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./db": {
+      "types": "./dist/db.d.ts",
+      "import": "./dist/db.js"
+    },
+    "./plantuml": {
+      "types": "./dist/plantuml.d.ts",
+      "import": "./dist/plantuml.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./encode": {
+      "types": "./dist/encode.d.ts",
+      "import": "./dist/encode.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "CLAUDE.md",
+    "compose.yml"
+  ],
+  "scripts": {
+    "build": "bun run build:js && bun run build:types",
+    "build:js": "bun build ./src/index.ts ./src/db.ts ./src/plantuml.ts ./src/server.ts ./src/encode.ts ./src/html.ts ./src/cli.ts --outdir=dist --target=bun --format=esm --splitting",
+    "build:types": "tsc --project tsconfig.build.json",
+    "serve": "bun run src/cli.ts serve",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "cqrs",
+    "domain-modeling",
+    "plantuml",
+    "sqlite",
+    "diagram-server"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blueshed/seiro.git",
+    "directory": "packages/model"
+  }
+}
