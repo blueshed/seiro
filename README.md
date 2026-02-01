@@ -6,6 +6,10 @@
 
 CQRS over WebSocket with Bun and Preact Signals.
 
+<p align="center">
+  <img src="flow.svg" alt="Seiro Architecture" width="700" />
+</p>
+
 ## Packages
 
 - **[seiro](./packages/seiro)** - Core library + domain modelling CLI
