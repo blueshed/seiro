@@ -1,3 +1,8 @@
+---
+name: publish
+description: Publish seiro and create-seiro packages to npm following the ordered release runbook. Use when the user wants to publish or release a new version.
+---
+
 # /publish
 
 Publish seiro and create-seiro packages to npm. Both packages MUST have the same version number.
