@@ -141,47 +141,47 @@ export function createServer(options: ServerOptions) {
       }),
 
       // Use cases diagram
-      "/use-cases.svg": () => {
+      "/use-cases.svg": async () => {
         const model = getModel();
         try {
-          return getCachedSvg(`${cacheDir}/use-cases.svg`, () => generateUseCasesPuml(model));
+          return await getCachedSvg(`${cacheDir}/use-cases.svg`, () => generateUseCasesPuml(model));
         } finally {
           model.close();
         }
       },
 
       // Entities diagram (domain only)
-      "/entities.svg": () => {
+      "/entities.svg": async () => {
         const model = getModel();
         try {
-          return getCachedSvg(`${cacheDir}/entities.svg`, () => generateEntitiesPuml(model));
+          return await getCachedSvg(`${cacheDir}/entities.svg`, () => generateEntitiesPuml(model));
         } finally {
           model.close();
         }
       },
 
       // Commands diagram
-      "/commands.svg": () => {
+      "/commands.svg": async () => {
         const model = getModel();
         try {
-          return getCachedSvg(`${cacheDir}/commands.svg`, () => generateCommandsPuml(model));
+          return await getCachedSvg(`${cacheDir}/commands.svg`, () => generateCommandsPuml(model));
         } finally {
           model.close();
         }
       },
 
       // Events diagram
-      "/events.svg": () => {
+      "/events.svg": async () => {
         const model = getModel();
         try {
-          return getCachedSvg(`${cacheDir}/events.svg`, () => generateEventsPuml(model));
+          return await getCachedSvg(`${cacheDir}/events.svg`, () => generateEventsPuml(model));
         } finally {
           model.close();
         }
       },
 
       // Actor diagrams
-      "/actors/:file": (req) => {
+      "/actors/:file": async (req) => {
         const file = req.params.file;
         if (!file.endsWith(".svg")) return new Response("Not found", { status: 404 });
         const slug = file.slice(0, -4);
@@ -190,14 +190,14 @@ export function createServer(options: ServerOptions) {
           const actors = model.getActors();
           const actor = actors.find(a => toId(a.name) === slug);
           if (!actor) return new Response("Not found", { status: 404 });
-          return getCachedSvg(`${cacheDir}/actors/${slug}.svg`, () => generateActorPuml(model, actor.name));
+          return await getCachedSvg(`${cacheDir}/actors/${slug}.svg`, () => generateActorPuml(model, actor.name));
         } finally {
           model.close();
         }
       },
 
       // Entity detail diagrams
-      "/entities/:file": (req) => {
+      "/entities/:file": async (req) => {
         const file = req.params.file;
         if (!file.endsWith(".svg")) return new Response("Not found", { status: 404 });
         const slug = file.slice(0, -4);
@@ -206,14 +206,14 @@ export function createServer(options: ServerOptions) {
           const entities = model.getEntities();
           const entity = entities.find(e => toId(e.name) === slug);
           if (!entity) return new Response("Not found", { status: 404 });
-          return getCachedSvg(`${cacheDir}/entities/${slug}.svg`, () => generateEntityPuml(model, entity.name));
+          return await getCachedSvg(`${cacheDir}/entities/${slug}.svg`, () => generateEntityPuml(model, entity.name));
         } finally {
           model.close();
         }
       },
 
       // Sequence diagrams
-      "/sequences/:file": (req) => {
+      "/sequences/:file": async (req) => {
         const file = req.params.file;
         if (!file.endsWith(".svg")) return new Response("Not found", { status: 404 });
         const slug = file.slice(0, -4);
@@ -222,14 +222,14 @@ export function createServer(options: ServerOptions) {
           const sequences = model.getSequences();
           const seq = sequences.find(s => toId(s.name) === slug);
           if (!seq) return new Response("Not found", { status: 404 });
-          return getCachedSvg(`${cacheDir}/sequences/${slug}.svg`, () => generateSequencePuml(model, seq.name));
+          return await getCachedSvg(`${cacheDir}/sequences/${slug}.svg`, () => generateSequencePuml(model, seq.name));
         } finally {
           model.close();
         }
       },
 
       // Document diagrams
-      "/documents/:file": (req) => {
+      "/documents/:file": async (req) => {
         const file = req.params.file;
         if (!file.endsWith(".svg")) return new Response("Not found", { status: 404 });
         const slug = file.slice(0, -4);
@@ -238,14 +238,14 @@ export function createServer(options: ServerOptions) {
           const documents = model.getDocuments();
           const doc = documents.find(d => toId(d.name) === slug);
           if (!doc) return new Response("Not found", { status: 404 });
-          return getCachedSvg(`${cacheDir}/documents/${slug}.svg`, () => generateDocumentPuml(model, doc.name));
+          return await getCachedSvg(`${cacheDir}/documents/${slug}.svg`, () => generateDocumentPuml(model, doc.name));
         } finally {
           model.close();
         }
       },
 
       // Document command sequence diagrams
-      "/document-commands/:file": (req) => {
+      "/document-commands/:file": async (req) => {
         const file = req.params.file;
         if (!file.endsWith(".svg")) return new Response("Not found", { status: 404 });
         const slug = file.slice(0, -4);
@@ -254,7 +254,7 @@ export function createServer(options: ServerOptions) {
           const documents = model.getDocuments();
           const doc = documents.find(d => toId(d.name) === slug);
           if (!doc) return new Response("Not found", { status: 404 });
-          return getCachedSvg(`${cacheDir}/document-commands/${slug}.svg`, () => generateDocumentCommandsPuml(model, doc.name));
+          return await getCachedSvg(`${cacheDir}/document-commands/${slug}.svg`, () => generateDocumentCommandsPuml(model, doc.name));
         } finally {
           model.close();
         }

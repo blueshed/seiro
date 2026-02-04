@@ -3,8 +3,9 @@ import type { Commands, Queries, Events, User } from "./types";
 import { initAuth, user } from "./components/auth";
 import "./components/auth";
 
-// Create client
-const wsUrl = `ws://${window.location.host}/ws`;
+// Create client - use wss:// for https, ws:// for http
+const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 const client = createClient<Commands, Queries, Events>(wsUrl);
 
 // Connect and initialize

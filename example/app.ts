@@ -5,8 +5,9 @@ import { initShipments } from "./components/shipments";
 import "./components/auth";
 import "./components/shipments";
 
-// Create client
-const wsUrl = `ws://${window.location.host}/ws`;
+// Create client - use wss:// for https, ws:// for http
+const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 const client = createClient<Commands, Queries, Events>(wsUrl);
 
 // Connect and initialize

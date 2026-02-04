@@ -649,7 +649,7 @@ function list(args: string[]) {
 }
 
 async function up() {
-  const composeFile = new URL("../compose.yml", import.meta.url).pathname;
+  const composeFile = new URL("../../compose.yml", import.meta.url).pathname;
   const proc = Bun.spawn(["docker", "compose", "-f", composeFile, "up", "-d"], {
     stdout: "inherit",
     stderr: "inherit",
@@ -661,7 +661,7 @@ async function up() {
 }
 
 async function down() {
-  const composeFile = new URL("../compose.yml", import.meta.url).pathname;
+  const composeFile = new URL("../../compose.yml", import.meta.url).pathname;
   const proc = Bun.spawn(["docker", "compose", "-f", composeFile, "down"], {
     stdout: "inherit",
     stderr: "inherit",
