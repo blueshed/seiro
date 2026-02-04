@@ -2,9 +2,16 @@
 
 All notable changes to seiro will be documented in this file.
 
-## [0.1.10] - Unreleased
+## [0.1.11] - Unreleased
 
 (No changes yet)
+
+## [0.1.10] - 2026-02-04
+
+### Fixed
+- WebSocket protocol detection: use `wss://` for HTTPS and `ws://` for HTTP in client app template
+- Compose file path resolution in `seiro model` CLI (`../compose.yml` → `../../compose.yml`)
+- Add missing `async`/`await` to SVG route handlers in model server
 
 ## [0.1.9] - 2026-02-01
 
