@@ -40,10 +40,25 @@ export type End = {
   id: number;
 };
 
-// Event: server → client (broadcast)
+// Event: server → client (broadcast).
+// `id` is the events-log row id as a string (bigint-safe); carried on both
+// live and backfilled events so clients can dedup and advance a resume cursor.
 export type Event = {
   ev: string;
   data: object;
+  id?: string;
+};
+
+// Subscribe: client → server.
+// If `since` is set, the server replays events with id > since matching the
+// pattern before live delivery; the client then dedups by id.
+export type Sub = {
+  sub: string;
+  since?: string;
+};
+
+export type Unsub = {
+  unsub: string;
 };
 
 // === Type Guards ===
@@ -78,12 +93,21 @@ export function isEnd(msg: unknown): msg is End {
     msg !== null &&
     "id" in msg &&
     !("row" in msg) &&
-    !("err" in msg)
+    !("err" in msg) &&
+    !("ev" in msg)
   );
 }
 
 export function isEvent(msg: unknown): msg is Event {
   return typeof msg === "object" && msg !== null && "ev" in msg;
+}
+
+export function isSub(msg: unknown): msg is Sub {
+  return typeof msg === "object" && msg !== null && "sub" in msg;
+}
+
+export function isUnsub(msg: unknown): msg is Unsub {
+  return typeof msg === "object" && msg !== null && "unsub" in msg;
 }
 
 // === Utility ===

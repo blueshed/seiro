@@ -9,9 +9,13 @@ import {
   isEnd,
   isEvent,
   isQuery,
-  isRow
-} from "./index-txbk53zc.js";
+  isRow,
+  isSub,
+  isUnsub
+} from "./index-n1nhtd8q.js";
 export {
+  isUnsub,
+  isSub,
   isRow,
   isQuery,
   isEvent,

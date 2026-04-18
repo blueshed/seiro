@@ -1,7 +1,8 @@
 import { notifyLogger } from "./logger";
+import type { BackfillHandler, BackfillRow, EmitMeta } from "./server";
 import type { EventsDef, EventData } from "./types";
 
-export type EventRow = { type: string; payload: unknown };
+export type EventRow = { id: string; type: string; payload: unknown };
 
 export type EventRelayOptions<E extends EventsDef> = {
   listen: (
@@ -9,7 +10,20 @@ export type EventRelayOptions<E extends EventsDef> = {
     onNotify: (payload: string) => void,
   ) => Promise<unknown>;
   fetchByIds: (ids: string[]) => Promise<EventRow[]>;
-  emit: <K extends keyof E>(event: K, data: EventData<E, K>) => void;
+  emit: <K extends keyof E>(
+    event: K,
+    data: EventData<E, K>,
+    meta?: EmitMeta,
+  ) => void;
+  // Optional: enables `{sub, since}` resume. If provided alongside
+  // setBackfill, the relay registers a backfill handler that streams rows
+  // matching a pattern for a given client context.
+  fetchSince?: (
+    pattern: string,
+    since: string,
+    ctx: { userId: number | null },
+  ) => AsyncIterable<BackfillRow>;
+  setBackfill?: (handler: BackfillHandler) => void;
   channel?: string;
   batchMs?: number;
 };
@@ -33,6 +47,7 @@ export async function createEventRelay<E extends EventsDef>(
         opts.emit(
           row.type as keyof E,
           row.payload as EventData<E, keyof E>,
+          { id: row.id },
         );
       }
     } catch (e) {
@@ -50,4 +65,10 @@ export async function createEventRelay<E extends EventsDef>(
     }
   });
   notifyLogger.info(`Event relay listening on "${channel}"`);
+
+  if (opts.fetchSince && opts.setBackfill) {
+    const fetchSince = opts.fetchSince;
+    opts.setBackfill((pattern, since, ctx) => fetchSince(pattern, since, ctx));
+    notifyLogger.info("Event relay resume enabled");
+  }
 }

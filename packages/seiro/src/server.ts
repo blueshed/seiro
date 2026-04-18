@@ -1,5 +1,5 @@
 import type { ServerWebSocket } from "bun";
-import { isCmd, isQuery, encode, decode } from "./protocol";
+import { isCmd, isQuery, isSub, isUnsub, encode, decode } from "./protocol";
 import { serverLogger, logWsAccess } from "./logger";
 
 // Re-export logger utilities for consumers
@@ -45,6 +45,18 @@ export type CommandContext<E extends EventsDef> = {
   send: <K extends keyof E>(event: K, data: EventData<E, K>) => void;
 };
 
+export type EmitMeta = { id?: string };
+
+export type BackfillContext = { userId: number | null };
+
+export type BackfillRow = { id: string; type: string; payload: unknown };
+
+export type BackfillHandler = (
+  pattern: string,
+  since: string,
+  ctx: BackfillContext,
+) => AsyncIterable<BackfillRow>;
+
 export type OpenContext = {
   userId: number | null;
   send: (data: unknown) => void;
@@ -86,9 +98,18 @@ export function createServer<
   const commandHandlers = new Map<string, CommandHandler<C, keyof C, E>>();
   const queryHandlers = new Map<string, QueryHandler<Q, keyof Q>>();
   let openHandler: OpenHandler | null = null;
+  let backfillHandler: BackfillHandler | null = null;
 
-  function emit<K extends keyof E>(channel: K, payload: E[K]) {
-    const msg = encode({ ev: channel as string, data: payload });
+  function emit<K extends keyof E>(
+    channel: K,
+    payload: E[K],
+    meta?: EmitMeta,
+  ) {
+    const msg = encode(
+      meta?.id !== undefined
+        ? { ev: channel as string, data: payload, id: meta.id }
+        : { ev: channel as string, data: payload },
+    );
     let matchedPatterns = 0;
     let matchedClients = 0;
     for (const [pattern, clientIds] of subscriptions) {
@@ -107,6 +128,10 @@ export function createServer<
 
   function sendToClient<K extends keyof E>(ws: WS, event: K, data: E[K]) {
     ws.send(encode({ ev: event as string, data }));
+  }
+
+  function setBackfill(handler: BackfillHandler) {
+    backfillHandler = handler;
   }
 
   function matchPattern(pattern: string, channel: string): boolean {
@@ -239,16 +264,40 @@ export function createServer<
       return;
     }
 
-    if (typeof msg === "object" && msg !== null && "sub" in msg) {
-      const pattern = (msg as { sub: string }).sub;
+    if (isSub(msg)) {
+      const pattern = msg.sub;
+      // Register for live delivery first so we never drop events that land
+      // mid-backfill; clients dedup by event id.
       ws.data.subscriptions.add(pattern);
       if (!subscriptions.has(pattern)) subscriptions.set(pattern, new Set());
       subscriptions.get(pattern)!.add(ws.data.id);
+
+      if (msg.since !== undefined && backfillHandler) {
+        const since = msg.since;
+        const userId = ws.data.userId;
+        (async () => {
+          try {
+            for await (const row of backfillHandler!(pattern, since, {
+              userId,
+            })) {
+              ws.send(
+                encode({ ev: row.type, data: row.payload, id: row.id }),
+              );
+            }
+          } catch (e) {
+            serverLogger.warn(
+              `Backfill ${pattern} since ${since} failed: ${
+                e instanceof Error ? e.message : String(e)
+              }`,
+            );
+          }
+        })();
+      }
       return;
     }
 
-    if (typeof msg === "object" && msg !== null && "unsub" in msg) {
-      const pattern = (msg as { unsub: string }).unsub;
+    if (isUnsub(msg)) {
+      const pattern = msg.unsub;
       ws.data.subscriptions.delete(pattern);
       subscriptions.get(pattern)?.delete(ws.data.id);
     }
@@ -321,7 +370,7 @@ export function createServer<
     });
   }
 
-  return { command, query, onOpen, start, emit };
+  return { command, query, onOpen, start, emit, setBackfill };
 }
 
 export type Server<

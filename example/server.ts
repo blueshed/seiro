@@ -23,20 +23,45 @@ const server = createServer<Commands, Queries, Events>({
   },
 });
 
+// Translate a seiro subscription pattern ("shipment_*") into a SQL LIKE
+// expression, escaping the SQL metachars `_` and `%` using `#` so event
+// type names with underscores match exactly.
+function patternToLike(pattern: string): string {
+  const hasStar = pattern.endsWith("*");
+  const core = hasStar ? pattern.slice(0, -1) : pattern;
+  const escaped = core.replace(/([#_%])/g, "#$1");
+  return hasStar ? `${escaped}%` : escaped;
+}
+
 // One LISTEN channel for every domain: the events table is the log, pg_notify
 // carries only the row id, and the relay fetches rows and fans out to
-// pattern-matched subscribers.
+// pattern-matched subscribers. `fetchSince` powers reconnect resume.
 await createEventRelay<Events>({
   listen: (channel, onNotify) => listener.listen(channel, onNotify),
   fetchByIds: async (ids) => {
-    const rows = await sql<{ type: string; payload: unknown }[]>`
-      SELECT type, payload FROM events
+    const rows = await sql<
+      { id: string; type: string; payload: unknown }[]
+    >`
+      SELECT id::text AS id, type, payload FROM events
       WHERE id = ANY(${ids}::bigint[])
       ORDER BY id
     `;
     return rows;
   },
-  emit: (event, data) => server.emit(event, data),
+  fetchSince: async function* (pattern, since) {
+    const like = patternToLike(pattern);
+    const rows = await sql<
+      { id: string; type: string; payload: unknown }[]
+    >`
+      SELECT id::text AS id, type, payload FROM events
+      WHERE id > ${since}::bigint
+        AND type LIKE ${like} ESCAPE '#'
+      ORDER BY id
+    `;
+    for (const row of rows) yield row;
+  },
+  setBackfill: (fn) => server.setBackfill(fn),
+  emit: (event, data, meta) => server.emit(event, data, meta),
 });
 
 registerAuth(server, sql);

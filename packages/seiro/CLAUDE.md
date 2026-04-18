@@ -16,11 +16,19 @@ CQRS over WebSocket with Bun + Preact Signals.
 ← { id }                    query end
 ← { id, err }               query error
 
-← { ev, data }              event broadcast
+← { ev, data, id? }         event broadcast (id is the events-log row id
+                            as a string; present for both live and
+                            backfilled events)
 
-→ { sub: "pattern" }        subscribe to events
+→ { sub: "pattern", since? } subscribe; if `since` is a bigint-string the
+                            server replays events with id > since
+                            matching the pattern before live delivery
 → { unsub: "pattern" }      unsubscribe
 ```
+
+Events carry a monotonic `id` so clients can dedup and advance a resume
+cursor. All new fields are additive -- old clients ignore `id` and never
+send `since`, which keeps them forward-compatible.
 
 ## Type Definitions
 
@@ -128,23 +136,48 @@ export async function register<
 
 Wire one relay per server. It owns the single `LISTEN events` connection,
 coalesces notified ids, fetches rows in a single batch, and calls
-`server.emit` per event:
+`server.emit` per event. Passing `fetchSince` + `setBackfill` enables
+reconnect resume via `{sub, since}`:
 
 ```typescript
 import { createEventRelay } from "seiro/server";
 
 await createEventRelay<Events>({
   listen: (channel, onNotify) => listener.listen(channel, onNotify),
-  fetchByIds: async (ids) => sql<{ type: string; payload: unknown }[]>`
-    SELECT type, payload FROM events
+  fetchByIds: async (ids) => sql<
+    { id: string; type: string; payload: unknown }[]
+  >`
+    SELECT id::text AS id, type, payload FROM events
     WHERE id = ANY(${ids}::bigint[])
     ORDER BY id
   `,
-  emit: (event, data) => server.emit(event, data),
+  fetchSince: async function* (pattern, since) {
+    // Translate seiro's suffix-wildcard (foo_*) into a SQL LIKE expression
+    // with `#` as the escape char so underscores in event type names match
+    // literally. See `example/server.ts` for `patternToLike`.
+    const like = patternToLike(pattern);
+    const rows = await sql<
+      { id: string; type: string; payload: unknown }[]
+    >`
+      SELECT id::text AS id, type, payload FROM events
+      WHERE id > ${since}::bigint
+        AND type LIKE ${like} ESCAPE '#'
+      ORDER BY id
+    `;
+    for (const row of rows) yield row;
+  },
+  setBackfill: (fn) => server.setBackfill(fn),
+  emit: (event, data, meta) => server.emit(event, data, meta),
   // channel: "events"   -- override if you use a different notify channel
   // batchMs: 5          -- coalesce window
 });
 ```
+
+`fetchSince` receives the raw subscription pattern, the client's last-seen
+event id (as a string to stay bigint-safe), and a `{ userId }` context so
+you can scope replays. Events emitted between the SELECT and the
+client's addition to the subscription map are delivered live and deduped
+on the client by id -- no coordination needed.
 
 ### Server Methods
 
@@ -172,8 +205,10 @@ server.command("auth.login", async (data, ctx) => {
 import { createClient, effect } from "seiro/client";
 
 const client = createClient<Commands, Queries, Events>(wsUrl, {
-  tokenKey: "my_token",  // localStorage key (default: "seiro_token")
-  token: "...",          // initial token (optional)
+  tokenKey: "my_token",       // localStorage key (default: "seiro_token")
+  token: "...",                // initial token (optional)
+  eventIdKey: "my_last_event", // localStorage key for resume cursor
+                                // (default: `${tokenKey}_last_event_id`)
 });
 
 const profile = await client.connect<User>();  // returns profile or null
@@ -214,11 +249,16 @@ effect(() => {
 // Auth
 client.setToken(token);
 client.getToken();
-client.logout();  // clears token
+client.logout();  // clears token and the resume cursor
+
+// Resume cursor
+client.getLastEventId();  // string | null -- highest event id seen so far
 
 // Connection
 client.close();
-await client.reconnect();
+await client.reconnect();  // after reconnect, call subscribe() again;
+                           // it will send {sub, since: lastEventId} so the
+                           // server backfills anything missed while offline
 ```
 
 ## Streaming Queries
