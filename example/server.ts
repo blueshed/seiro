@@ -1,5 +1,5 @@
 import postgres from "postgres";
-import { createServer } from "seiro/server";
+import { createServer, createEventRelay } from "seiro/server";
 import homepage from "./index.html";
 import { register as registerShipment } from "./shipment/server";
 import { register as registerAuth, verifyToken } from "./auth/server";
@@ -23,8 +23,24 @@ const server = createServer<Commands, Queries, Events>({
   },
 });
 
+// One LISTEN channel for every domain: the events table is the log, pg_notify
+// carries only the row id, and the relay fetches rows and fans out to
+// pattern-matched subscribers.
+await createEventRelay<Events>({
+  listen: (channel, onNotify) => listener.listen(channel, onNotify),
+  fetchByIds: async (ids) => {
+    const rows = await sql<{ type: string; payload: unknown }[]>`
+      SELECT type, payload FROM events
+      WHERE id = ANY(${ids}::bigint[])
+      ORDER BY id
+    `;
+    return rows;
+  },
+  emit: (event, data) => server.emit(event, data),
+});
+
 registerAuth(server, sql);
-await registerShipment(server, sql, listener);
+await registerShipment(server, sql);
 
 const app = await server.start({ "/": homepage });
 

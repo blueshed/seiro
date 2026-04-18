@@ -16,6 +16,11 @@ export {
   logWsAccess,
   type Logger,
 } from "./logger";
+export {
+  createEventRelay,
+  type EventRelayOptions,
+  type EventRow,
+} from "./event-relay";
 import type {
   CommandsDef,
   QueriesDef,

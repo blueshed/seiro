@@ -1,6 +1,5 @@
 import type { Sql } from "postgres";
 import type { Server } from "seiro";
-import { notifyLogger } from "seiro/server";
 import type {
   Shipment,
   ShipmentCommands,
@@ -8,35 +7,13 @@ import type {
   ShipmentEvents,
 } from "./types";
 
-const channels = [
-  "shipment_created",
-  "shipment_claimed",
-  "shipment_delivered",
-] as const;
-
 export async function register<
   C extends ShipmentCommands,
   Q extends ShipmentQueries,
   E extends ShipmentEvents,
->(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
-  // Listen to postgres notifications
-  // The onlisten callback (3rd param) is called on connect AND reconnect
-  if (listener) {
-    for (const channel of channels) {
-      await listener.listen(
-        channel,
-        (payload: string) => {
-          try {
-            server.emit(channel, JSON.parse(payload) as Shipment);
-          } catch (e) {
-            notifyLogger.error(`Failed to parse ${channel} payload:`, payload, e);
-          }
-        },
-        () => notifyLogger.info(`Listening on ${channel}`),
-      );
-    }
-  }
-  // Commands
+>(server: Server<C, Q, E>, sql: Sql) {
+  // Commands -- the cmd_* functions append to the events table and fire a
+  // single pg_notify('events', id) which the top-level event relay picks up.
 
   server.command("shipment.create", async (data, ctx) => {
     if (!ctx.userId) throw new Error("Not authenticated");

@@ -74,13 +74,24 @@ const server = createServer<Commands, Queries, Events>({
   },
 });
 
+// Wire the single event relay (LISTEN events, fans out via server.emit)
+await createEventRelay<Events>({
+  listen: (ch, h) => listener.listen(ch, h),
+  fetchByIds: (ids) => sql`SELECT type, payload FROM events WHERE id = ANY(${ids}::bigint[]) ORDER BY id`,
+  emit: (event, data) => server.emit(event, data),
+});
+
 // Register domain handlers
-await entity.register(server, sql, listener);
+await entity.register(server, sql);
 
 await server.start({ "/": homepage });
 ```
 
 ### Domain Handler Pattern
+
+Domains register commands and queries only. Events reach clients via the
+top-level event relay (see below) -- `cmd_*` functions append to the `events`
+table and the relay fans them out. Domains never call `LISTEN` directly.
 
 ```typescript
 import type { Sql } from "postgres";
@@ -90,26 +101,7 @@ export async function register<
   C extends EntityCommands,
   Q extends EntityQueries,
   E extends EntityEvents,
->(server: Server<C, Q, E>, sql: Sql, listener?: Sql) {
-  // Listen to postgres notifications
-  if (listener) {
-    await listener.listen("entity_created", (payload: string) => {
-      try {
-        server.emit("entity_created", JSON.parse(payload) as Entity);
-      } catch (e) {
-        console.error("Failed to parse entity_created payload:", payload, e);
-      }
-    });
-
-    await listener.listen("entity_deleted", (payload: string) => {
-      try {
-        server.emit("entity_deleted", JSON.parse(payload) as { id: number });
-      } catch (e) {
-        console.error("Failed to parse entity_deleted payload:", payload, e);
-      }
-    });
-  }
-
+>(server: Server<C, Q, E>, sql: Sql) {
   // Command - returns result
   server.command("entity.save", async (data, ctx) => {
     if (!ctx.userId) throw new Error("Not authenticated");
@@ -130,6 +122,28 @@ export async function register<
     }
   });
 }
+```
+
+### Event Relay
+
+Wire one relay per server. It owns the single `LISTEN events` connection,
+coalesces notified ids, fetches rows in a single batch, and calls
+`server.emit` per event:
+
+```typescript
+import { createEventRelay } from "seiro/server";
+
+await createEventRelay<Events>({
+  listen: (channel, onNotify) => listener.listen(channel, onNotify),
+  fetchByIds: async (ids) => sql<{ type: string; payload: unknown }[]>`
+    SELECT type, payload FROM events
+    WHERE id = ANY(${ids}::bigint[])
+    ORDER BY id
+  `,
+  emit: (event, data) => server.emit(event, data),
+  // channel: "events"   -- override if you use a different notify channel
+  // batchMs: 5          -- coalesce window
+});
 ```
 
 ### Server Methods
@@ -232,7 +246,43 @@ for await (const row of client.query("logs.stream")) {
 
 ## SQL Conventions
 
-Commands return `{ id }` via JSONB:
+### Events log
+
+One log table per database. cmd_* functions append rows here and fire a
+single `pg_notify('events', id::text)`:
+
+```sql
+CREATE TABLE events (
+  id         BIGSERIAL PRIMARY KEY,
+  type       TEXT NOT NULL,
+  user_id    INT,
+  payload    JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_events_type_id ON events (type, id DESC);
+
+CREATE FUNCTION emit_event(p_type TEXT, p_user_id INT, p_payload JSONB)
+RETURNS BIGINT AS $$
+DECLARE
+  v_id BIGINT;
+BEGIN
+  INSERT INTO events (type, user_id, payload)
+  VALUES (p_type, p_user_id, p_payload)
+  RETURNING id INTO v_id;
+  PERFORM pg_notify('events', v_id::text);
+  RETURN v_id;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+This keeps payloads off the 8KB NOTIFY channel, gives a durable audit trail,
+and (in a follow-up phase) enables `since`-cursor resume on reconnect.
+
+### Command functions
+
+Commands return `{ id }` via JSONB and call `emit_event` -- never `pg_notify`
+directly:
 
 ```sql
 CREATE FUNCTION cmd_entity_save(p_user_id int, data jsonb)
@@ -244,7 +294,11 @@ BEGIN
   VALUES (p_user_id, data->>'name')
   RETURNING * INTO v_entity;
 
-  PERFORM pg_notify('entity_created', row_to_json(v_entity)::text);
+  PERFORM emit_event(
+    'entity_created',
+    p_user_id,
+    jsonb_build_object('id', v_entity.id, 'name', v_entity.name)
+  );
   RETURN jsonb_build_object('id', v_entity.id);
 END;
 $$ LANGUAGE plpgsql;
@@ -269,7 +323,7 @@ $$ LANGUAGE sql;
 import type { Command, Query, Server, Client } from "seiro";
 
 // Server
-import { createServer } from "seiro/server";
+import { createServer, createEventRelay } from "seiro/server";
 
 // Client  
 import { createClient, signal, computed, effect } from "seiro/client";

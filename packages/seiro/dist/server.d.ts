@@ -1,4 +1,5 @@
 export { createLogger, serverLogger, dbLogger, authLogger, wsLogger, notifyLogger, accessLogger, runtimeLogger, logAccess, logWsAccess, type Logger, } from "./logger";
+export { createEventRelay, type EventRelayOptions, type EventRow, } from "./event-relay";
 import type { CommandsDef, QueriesDef, EventsDef, CommandData, QueryParams, QueryRow, EventData } from "./types";
 type ClientData = {
     id: string;

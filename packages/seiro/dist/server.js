@@ -2,6 +2,7 @@
 import {
   accessLogger,
   authLogger,
+  createEventRelay,
   createLogger,
   createServer,
   dbLogger,
@@ -11,7 +12,7 @@ import {
   runtimeLogger,
   serverLogger,
   wsLogger
-} from "./index-6x70ksev.js";
+} from "./index-02dmpsbr.js";
 import"./index-txbk53zc.js";
 export {
   wsLogger,
@@ -23,6 +24,7 @@ export {
   dbLogger,
   createServer,
   createLogger,
+  createEventRelay,
   authLogger,
   accessLogger
 };

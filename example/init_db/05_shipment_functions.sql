@@ -1,4 +1,7 @@
--- Shipment commands
+-- Shipment commands.
+-- Each cmd_* writes the business row, then appends to the events log via
+-- emit_event(). The only pg_notify is 'events' with the new row id --
+-- keeping payloads off the 8KB NOTIFY channel and giving us a durable log.
 
 CREATE OR REPLACE FUNCTION cmd_shipment_create(p_user_id INT, data JSONB)
 RETURNS JSONB AS $$
@@ -17,7 +20,7 @@ BEGIN
     'carrierId', carrier_id
   ) INTO v_result;
 
-  PERFORM pg_notify('shipment_created', v_result::text);
+  PERFORM emit_event('shipment_created', p_user_id, v_result);
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql;
@@ -43,7 +46,7 @@ BEGIN
     RAISE EXCEPTION 'Shipment not found or already claimed';
   END IF;
 
-  PERFORM pg_notify('shipment_claimed', v_result::text);
+  PERFORM emit_event('shipment_claimed', p_user_id, v_result);
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql;
@@ -69,7 +72,7 @@ BEGIN
     RAISE EXCEPTION 'Shipment not found or not claimed';
   END IF;
 
-  PERFORM pg_notify('shipment_delivered', v_result::text);
+  PERFORM emit_event('shipment_delivered', p_user_id, v_result);
   RETURN v_result;
 END;
 $$ LANGUAGE plpgsql;
