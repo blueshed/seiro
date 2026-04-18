@@ -1,10 +1,10 @@
 // @bun
 import {
   createClient
-} from "./index-04xfdvx9.js";
+} from "./index-t6xp67m3.js";
 import {
   createServer
-} from "./index-6x70ksev.js";
+} from "./index-84q2zz46.js";
 import {
   cid,
   decode,
@@ -15,9 +15,13 @@ import {
   isEnd,
   isEvent,
   isQuery,
-  isRow
-} from "./index-txbk53zc.js";
+  isRow,
+  isSub,
+  isUnsub
+} from "./index-n1nhtd8q.js";
 export {
+  isUnsub,
+  isSub,
   isRow,
   isQuery,
   isEvent,
