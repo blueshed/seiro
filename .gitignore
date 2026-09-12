@@ -12,3 +12,8 @@ model.db
 .cache/
 
 stuff
+
+# Local secrets
+.env
+.env.*
+!.env.example

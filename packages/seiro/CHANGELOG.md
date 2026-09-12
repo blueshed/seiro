@@ -4,7 +4,9 @@ All notable changes to seiro will be documented in this file.
 
 ## [0.1.11] - Unreleased
 
-(No changes yet)
+### Fixed
+- `client.reconnect()`: the old socket's close handler no longer nulls the new connection, so commands after reconnect are sent
+- Event subscriptions are re-sent automatically when a fresh socket connects after `subscribe()` was called
 
 ## [0.1.10] - 2026-02-04
 

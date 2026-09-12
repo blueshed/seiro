@@ -30,44 +30,7 @@ bun test                 # Run tests
 
 Packages are published via GitHub Actions using trusted publishing (OIDC). No npm token needed.
 
-### To publish seiro:
-
-1. Update version in `packages/seiro/package.json`
-2. Commit the change
-3. Create and push tag:
-   ```bash
-   git tag seiro@0.1.2
-   git push origin main --tags
-   ```
-
-### To publish create-seiro:
-
-**Important:** Before publishing create-seiro, you must:
-
-1. Sync `/template` to `/packages/create-seiro/template`:
-   ```bash
-   rm -rf packages/create-seiro/template
-   cp -r template packages/create-seiro/template
-   ```
-
-2. Update the seiro dependency version in the bundled template:
-   ```bash
-   # In packages/create-seiro/template/package.json
-   # Update "seiro": "^x.x.x" to match the latest published version
-   ```
-
-3. Update version in `packages/create-seiro/package.json`
-
-4. Commit and tag:
-   ```bash
-   git tag create-seiro@0.1.2
-   git push origin main --tags
-   ```
-
-5. Clear local bun cache (so `bunx create-seiro` fetches the new version):
-   ```bash
-   bun pm cache rm
-   ```
+Run the `/publish` skill (`.claude/skills/publish/SKILL.md`). It is the single runbook: it publishes seiro first, waits for npm, bumps the template's seiro dependency, syncs the template into create-seiro, publishes create-seiro at the same version, and verifies the result. Do not publish by hand from memory.
 
 ### Keeping in sync
 
@@ -75,7 +38,7 @@ The `/template` directory is the source of truth. When making changes:
 
 1. Edit files in `/template`
 2. Test locally
-3. Before publishing create-seiro, copy template to `packages/create-seiro/template`
+3. Before publishing create-seiro, sync it with `rsync -a --delete --exclude node_modules template/ packages/create-seiro/template/` (the `/publish` skill does this; never `cp -r`, which dereferences the node_modules symlinks)
 
 The `/example` directory is separate - it includes shipments domain as a reference implementation.
 

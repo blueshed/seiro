@@ -79,12 +79,13 @@ export function createClient<
     if (connectPromise) return connectPromise as Promise<P | null>;
 
     connectPromise = new Promise<P | null>((resolve, reject) => {
-      ws = new WebSocket(buildUrl());
+      const socket = new WebSocket(buildUrl());
+      ws = socket;
       let profileReceived = false;
 
-      ws.onerror = (e) => reject(e);
+      socket.onerror = (e) => reject(e);
 
-      ws.onmessage = (e) => {
+      socket.onmessage = (e) => {
         const msg = decode(e.data as string);
 
         // Handle profile message (first message after connect)
@@ -96,6 +97,12 @@ export function createClient<
         ) {
           profileReceived = true;
           connected.value = true;
+          // Re-establish event subscriptions on a fresh socket (e.g. after reconnect)
+          if (subscribed) {
+            for (const pattern of eventListeners.keys()) {
+              send({ sub: pattern });
+            }
+          }
           resolve((msg as { profile: P | null }).profile);
           return;
         }
@@ -152,7 +159,9 @@ export function createClient<
         }
       };
 
-      ws.onclose = () => {
+      socket.onclose = () => {
+        // A superseded socket (closed by reconnect) must not clobber the new one
+        if (ws !== socket) return;
         ws = null;
         connectPromise = null;
         connected.value = false;
