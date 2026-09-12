@@ -12,14 +12,14 @@ import {
   isRow
 } from "./index-txbk53zc.js";
 export {
-  isRow,
-  isQuery,
-  isEvent,
-  isEnd,
-  isCmdResult,
-  isCmdError,
-  isCmd,
-  encode,
+  cid,
   decode,
-  cid
+  encode,
+  isCmd,
+  isCmdError,
+  isCmdResult,
+  isEnd,
+  isEvent,
+  isQuery,
+  isRow
 };

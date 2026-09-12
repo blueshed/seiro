@@ -4,11 +4,11 @@ import {
   createClient,
   d,
   w
-} from "./index-04xfdvx9.js";
+} from "./index-kx54n5re.js";
 import"./index-txbk53zc.js";
 export {
-  d as signal,
-  E as effect,
+  w as computed,
   createClient,
-  w as computed
+  E as effect,
+  d as signal
 };

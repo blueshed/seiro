@@ -448,14 +448,20 @@ function createClient(url, options = {}) {
     if (connectPromise)
       return connectPromise;
     connectPromise = new Promise((resolve, reject) => {
-      ws = new WebSocket(buildUrl());
+      const socket = new WebSocket(buildUrl());
+      ws = socket;
       let profileReceived = false;
-      ws.onerror = (e2) => reject(e2);
-      ws.onmessage = (e2) => {
+      socket.onerror = (e2) => reject(e2);
+      socket.onmessage = (e2) => {
         const msg = decode(e2.data);
         if (!profileReceived && typeof msg === "object" && msg !== null && "profile" in msg) {
           profileReceived = true;
           connected.value = true;
+          if (subscribed) {
+            for (const pattern of eventListeners.keys()) {
+              send({ sub: pattern });
+            }
+          }
           resolve(msg.profile);
           return;
         }
@@ -500,7 +506,9 @@ function createClient(url, options = {}) {
           }
         }
       };
-      ws.onclose = () => {
+      socket.onclose = () => {
+        if (ws !== socket)
+          return;
         ws = null;
         connectPromise = null;
         connected.value = false;
@@ -521,13 +529,14 @@ function createClient(url, options = {}) {
   }
   function cmd(name, data, callbacks) {
     const id = cid();
-    if (callbacks) {
+    const ack = callbacks !== undefined;
+    if (ack) {
       cmdListeners.set(id, {
         onSuccess: callbacks.onSuccess,
         onError: callbacks.onError
       });
     }
-    send({ cmd: name, cid: id, data });
+    send({ cmd: name, cid: id, data, ack });
   }
   function query(name, params) {
     const id = ++queryId;

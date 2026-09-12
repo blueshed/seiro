@@ -34,7 +34,7 @@
     "compose.yml"
   ],
   "scripts": {
-    "build": "bun run build:js && bun run build:types",
+    "build": "rm -rf dist && bun run build:js && bun run build:types",
     "build:js": "bun build ./src/index.ts ./src/client.ts ./src/server.ts ./src/protocol.ts --outdir=dist --target=bun --format=esm --splitting",
     "build:types": "tsc --project tsconfig.build.json",
     "test": "bun test",
