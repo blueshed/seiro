@@ -4,6 +4,7 @@ export { signal, computed, effect, type Signal };
 export declare function createClient<C extends CommandsDef = CommandsDef, Q extends QueriesDef = QueriesDef, E extends EventsDef = EventsDef>(url: string, options?: {
     tokenKey?: string;
     token?: string;
+    eventIdKey?: string;
 }): {
     connect: <P = unknown>() => Promise<P | null>;
     reconnect: () => Promise<void>;
@@ -20,6 +21,7 @@ export declare function createClient<C extends CommandsDef = CommandsDef, Q exte
     subscribe: () => void;
     setToken: (token: string | null) => void;
     getToken: () => string | null;
+    getLastEventId: () => string | null;
     logout: () => void;
     close: () => void;
 };

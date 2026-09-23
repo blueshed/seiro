@@ -1,4 +1,5 @@
 export { createLogger, serverLogger, dbLogger, authLogger, wsLogger, notifyLogger, accessLogger, runtimeLogger, logAccess, logWsAccess, type Logger, } from "./logger";
+export { createEventRelay, type EventRelayOptions, type EventRow, } from "./event-relay";
 import type { CommandsDef, QueriesDef, EventsDef, CommandData, QueryParams, QueryRow, EventData } from "./types";
 type ClientData = {
     id: string;
@@ -10,6 +11,18 @@ export type CommandContext<E extends EventsDef> = {
     setUserId: (id: number) => void;
     send: <K extends keyof E>(event: K, data: EventData<E, K>) => void;
 };
+export type EmitMeta = {
+    id?: string;
+};
+export type BackfillContext = {
+    userId: number | null;
+};
+export type BackfillRow = {
+    id: string;
+    type: string;
+    payload: unknown;
+};
+export type BackfillHandler = (pattern: string, since: string, ctx: BackfillContext) => AsyncIterable<BackfillRow>;
 export type OpenContext = {
     userId: number | null;
     send: (data: unknown) => void;
@@ -34,7 +47,8 @@ export declare function createServer<C extends CommandsDef = CommandsDef, Q exte
     query: <K extends keyof Q & string>(name: K, handler: QueryHandler<Q, K>) => void;
     onOpen: (handler: OpenHandler) => void;
     start: (routes?: Record<string, unknown>) => Promise<Bun.Server<ClientData>>;
-    emit: <K extends keyof E>(channel: K, payload: E[K]) => void;
+    emit: <K extends keyof E>(channel: K, payload: E[K], meta?: EmitMeta) => void;
+    setBackfill: (handler: BackfillHandler) => void;
 };
 export type Server<C extends CommandsDef = CommandsDef, Q extends QueriesDef = QueriesDef, E extends EventsDef = EventsDef> = ReturnType<typeof createServer<C, Q, E>>;
 //# sourceMappingURL=server.d.ts.map

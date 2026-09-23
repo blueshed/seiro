@@ -1,14 +1,14 @@
 // @bun
 import {
-  cid,
-  decode,
-  encode,
-  isCmdError,
-  isCmdResult,
-  isEnd,
-  isEvent,
-  isRow
-} from "./index-txbk53zc.js";
+  isCmdError2,
+  isCmdResult2,
+  isRow2,
+  isEnd2,
+  isEvent2,
+  encode2,
+  decode2,
+  cid2
+} from "./index-qv3pb96h.js";
 
 // ../../node_modules/.bun/@preact+signals-core@1.12.2/node_modules/@preact/signals-core/dist/signals-core.mjs
 var i = Symbol.for("preact-signals");
@@ -17,7 +17,7 @@ function t() {
     r--;
     return;
   }
-  let i2, t2 = false;
+  let i, t = false;
   while (s !== undefined) {
     let o = s;
     s = undefined;
@@ -29,10 +29,10 @@ function t() {
       if (!(8 & o.f) && v(o))
         try {
           o.c();
-        } catch (o2) {
-          if (!t2) {
-            i2 = o2;
-            t2 = true;
+        } catch (o) {
+          if (!t) {
+            i = o;
+            t = true;
           }
         }
       o = n;
@@ -40,104 +40,104 @@ function t() {
   }
   f = 0;
   r--;
-  if (t2)
-    throw i2;
+  if (t)
+    throw i;
 }
 var n;
 var s;
-function h(i2) {
-  const t2 = n;
+function h(i) {
+  const t = n;
   n = undefined;
   try {
-    return i2();
+    return i();
   } finally {
-    n = t2;
+    n = t;
   }
 }
 var r = 0;
 var f = 0;
 var e = 0;
-function u(i2) {
+function u(i) {
   if (n === undefined)
     return;
-  let t2 = i2.n;
-  if (t2 === undefined || t2.t !== n) {
-    t2 = { i: 0, S: i2, p: n.s, n: undefined, t: n, e: undefined, x: undefined, r: t2 };
+  let t = i.n;
+  if (t === undefined || t.t !== n) {
+    t = { i: 0, S: i, p: n.s, n: undefined, t: n, e: undefined, x: undefined, r: t };
     if (n.s !== undefined)
-      n.s.n = t2;
-    n.s = t2;
-    i2.n = t2;
+      n.s.n = t;
+    n.s = t;
+    i.n = t;
     if (32 & n.f)
-      i2.S(t2);
-    return t2;
-  } else if (t2.i === -1) {
-    t2.i = 0;
-    if (t2.n !== undefined) {
-      t2.n.p = t2.p;
-      if (t2.p !== undefined)
-        t2.p.n = t2.n;
-      t2.p = n.s;
-      t2.n = undefined;
-      n.s.n = t2;
-      n.s = t2;
+      i.S(t);
+    return t;
+  } else if (t.i === -1) {
+    t.i = 0;
+    if (t.n !== undefined) {
+      t.n.p = t.p;
+      if (t.p !== undefined)
+        t.p.n = t.n;
+      t.p = n.s;
+      t.n = undefined;
+      n.s.n = t;
+      n.s = t;
     }
-    return t2;
+    return t;
   }
 }
-function c(i2, t2) {
-  this.v = i2;
+function c(i, t) {
+  this.v = i;
   this.i = 0;
   this.n = undefined;
   this.t = undefined;
-  this.W = t2 == null ? undefined : t2.watched;
-  this.Z = t2 == null ? undefined : t2.unwatched;
-  this.name = t2 == null ? undefined : t2.name;
+  this.W = t == null ? undefined : t.watched;
+  this.Z = t == null ? undefined : t.unwatched;
+  this.name = t == null ? undefined : t.name;
 }
 c.prototype.brand = i;
 c.prototype.h = function() {
   return true;
 };
-c.prototype.S = function(i2) {
-  const t2 = this.t;
-  if (t2 !== i2 && i2.e === undefined) {
-    i2.x = t2;
-    this.t = i2;
-    if (t2 !== undefined)
-      t2.e = i2;
+c.prototype.S = function(i) {
+  const t = this.t;
+  if (t !== i && i.e === undefined) {
+    i.x = t;
+    this.t = i;
+    if (t !== undefined)
+      t.e = i;
     else
       h(() => {
-        var i3;
-        (i3 = this.W) == null || i3.call(this);
+        var i;
+        (i = this.W) == null || i.call(this);
       });
   }
 };
-c.prototype.U = function(i2) {
+c.prototype.U = function(i) {
   if (this.t !== undefined) {
-    const { e: t2, x: o } = i2;
-    if (t2 !== undefined) {
-      t2.x = o;
-      i2.e = undefined;
+    const { e: t, x: o } = i;
+    if (t !== undefined) {
+      t.x = o;
+      i.e = undefined;
     }
     if (o !== undefined) {
-      o.e = t2;
-      i2.x = undefined;
+      o.e = t;
+      i.x = undefined;
     }
-    if (i2 === this.t) {
+    if (i === this.t) {
       this.t = o;
       if (o === undefined)
         h(() => {
-          var i3;
-          (i3 = this.Z) == null || i3.call(this);
+          var i;
+          (i = this.Z) == null || i.call(this);
         });
     }
   }
 };
-c.prototype.subscribe = function(i2) {
+c.prototype.subscribe = function(i) {
   return E(() => {
-    const t2 = this.value, o = n;
+    const t = this.value, o = n;
     n = undefined;
     try {
-      i2(t2);
+      i(t);
     } finally {
       n = o;
     }
@@ -153,85 +153,85 @@ c.prototype.toJSON = function() {
   return this.value;
 };
 c.prototype.peek = function() {
-  const i2 = n;
+  const i = n;
   n = undefined;
   try {
     return this.value;
   } finally {
-    n = i2;
+    n = i;
   }
 };
 Object.defineProperty(c.prototype, "value", { get() {
-  const i2 = u(this);
-  if (i2 !== undefined)
-    i2.i = this.i;
+  const i = u(this);
+  if (i !== undefined)
+    i.i = this.i;
   return this.v;
-}, set(i2) {
-  if (i2 !== this.v) {
+}, set(i) {
+  if (i !== this.v) {
     if (f > 100)
       throw new Error("Cycle detected");
-    this.v = i2;
+    this.v = i;
     this.i++;
     e++;
     r++;
     try {
-      for (let i3 = this.t;i3 !== undefined; i3 = i3.x)
-        i3.t.N();
+      for (let i = this.t;i !== undefined; i = i.x)
+        i.t.N();
     } finally {
       t();
     }
   }
 } });
-function d(i2, t2) {
-  return new c(i2, t2);
+function d(i, t) {
+  return new c(i, t);
 }
-function v(i2) {
-  for (let t2 = i2.s;t2 !== undefined; t2 = t2.n)
-    if (t2.S.i !== t2.i || !t2.S.h() || t2.S.i !== t2.i)
+function v(i) {
+  for (let t = i.s;t !== undefined; t = t.n)
+    if (t.S.i !== t.i || !t.S.h() || t.S.i !== t.i)
       return true;
   return false;
 }
-function l(i2) {
-  for (let t2 = i2.s;t2 !== undefined; t2 = t2.n) {
-    const o = t2.S.n;
+function l(i) {
+  for (let t = i.s;t !== undefined; t = t.n) {
+    const o = t.S.n;
     if (o !== undefined)
-      t2.r = o;
-    t2.S.n = t2;
-    t2.i = -1;
-    if (t2.n === undefined) {
-      i2.s = t2;
+      t.r = o;
+    t.S.n = t;
+    t.i = -1;
+    if (t.n === undefined) {
+      i.s = t;
       break;
     }
   }
 }
-function y(i2) {
-  let t2, o = i2.s;
+function y(i) {
+  let t, o = i.s;
   while (o !== undefined) {
-    const i3 = o.p;
+    const i = o.p;
     if (o.i === -1) {
       o.S.U(o);
-      if (i3 !== undefined)
-        i3.n = o.n;
+      if (i !== undefined)
+        i.n = o.n;
       if (o.n !== undefined)
-        o.n.p = i3;
+        o.n.p = i;
     } else
-      t2 = o;
+      t = o;
     o.S.n = o.r;
     if (o.r !== undefined)
       o.r = undefined;
-    o = i3;
+    o = i;
   }
-  i2.s = t2;
+  i.s = t;
 }
-function a(i2, t2) {
+function a(i, t) {
   c.call(this, undefined);
-  this.x = i2;
+  this.x = i;
   this.s = undefined;
   this.g = e - 1;
   this.f = 4;
-  this.W = t2 == null ? undefined : t2.watched;
-  this.Z = t2 == null ? undefined : t2.unwatched;
-  this.name = t2 == null ? undefined : t2.name;
+  this.W = t == null ? undefined : t.watched;
+  this.Z = t == null ? undefined : t.unwatched;
+  this.name = t == null ? undefined : t.name;
 }
 a.prototype = new c;
 a.prototype.h = function() {
@@ -249,122 +249,122 @@ a.prototype.h = function() {
     this.f &= -2;
     return true;
   }
-  const i2 = n;
+  const i = n;
   try {
     l(this);
     n = this;
-    const i3 = this.x();
-    if (16 & this.f || this.v !== i3 || this.i === 0) {
-      this.v = i3;
+    const i = this.x();
+    if (16 & this.f || this.v !== i || this.i === 0) {
+      this.v = i;
       this.f &= -17;
       this.i++;
     }
-  } catch (i3) {
-    this.v = i3;
+  } catch (i) {
+    this.v = i;
     this.f |= 16;
     this.i++;
   }
-  n = i2;
+  n = i;
   y(this);
   this.f &= -2;
   return true;
 };
-a.prototype.S = function(i2) {
+a.prototype.S = function(i) {
   if (this.t === undefined) {
     this.f |= 36;
-    for (let i3 = this.s;i3 !== undefined; i3 = i3.n)
-      i3.S.S(i3);
+    for (let i = this.s;i !== undefined; i = i.n)
+      i.S.S(i);
   }
-  c.prototype.S.call(this, i2);
+  c.prototype.S.call(this, i);
 };
-a.prototype.U = function(i2) {
+a.prototype.U = function(i) {
   if (this.t !== undefined) {
-    c.prototype.U.call(this, i2);
+    c.prototype.U.call(this, i);
     if (this.t === undefined) {
       this.f &= -33;
-      for (let i3 = this.s;i3 !== undefined; i3 = i3.n)
-        i3.S.U(i3);
+      for (let i = this.s;i !== undefined; i = i.n)
+        i.S.U(i);
     }
   }
 };
 a.prototype.N = function() {
   if (!(2 & this.f)) {
     this.f |= 6;
-    for (let i2 = this.t;i2 !== undefined; i2 = i2.x)
-      i2.t.N();
+    for (let i = this.t;i !== undefined; i = i.x)
+      i.t.N();
   }
 };
 Object.defineProperty(a.prototype, "value", { get() {
   if (1 & this.f)
     throw new Error("Cycle detected");
-  const i2 = u(this);
+  const i = u(this);
   this.h();
-  if (i2 !== undefined)
-    i2.i = this.i;
+  if (i !== undefined)
+    i.i = this.i;
   if (16 & this.f)
     throw this.v;
   return this.v;
 } });
-function w(i2, t2) {
-  return new a(i2, t2);
+function w(i, t) {
+  return new a(i, t);
 }
-function _(i2) {
-  const o = i2.u;
-  i2.u = undefined;
+function _(i) {
+  const o = i.u;
+  i.u = undefined;
   if (typeof o == "function") {
     r++;
-    const s2 = n;
+    const s = n;
     n = undefined;
     try {
       o();
-    } catch (t2) {
-      i2.f &= -2;
-      i2.f |= 8;
-      b(i2);
-      throw t2;
+    } catch (t) {
+      i.f &= -2;
+      i.f |= 8;
+      b(i);
+      throw t;
     } finally {
-      n = s2;
+      n = s;
       t();
     }
   }
 }
-function b(i2) {
-  for (let t2 = i2.s;t2 !== undefined; t2 = t2.n)
-    t2.S.U(t2);
-  i2.x = undefined;
-  i2.s = undefined;
-  _(i2);
+function b(i) {
+  for (let t = i.s;t !== undefined; t = t.n)
+    t.S.U(t);
+  i.x = undefined;
+  i.s = undefined;
+  _(i);
 }
-function g(i2) {
+function g(i) {
   if (n !== this)
     throw new Error("Out-of-order effect");
   y(this);
-  n = i2;
+  n = i;
   this.f &= -2;
   if (8 & this.f)
     b(this);
   t();
 }
-function p(i2, t2) {
-  this.x = i2;
+function p(i, t) {
+  this.x = i;
   this.u = undefined;
   this.s = undefined;
   this.o = undefined;
   this.f = 32;
-  this.name = t2 == null ? undefined : t2.name;
+  this.name = t == null ? undefined : t.name;
 }
 p.prototype.c = function() {
-  const i2 = this.S();
+  const i = this.S();
   try {
     if (8 & this.f)
       return;
     if (this.x === undefined)
       return;
-    const t2 = this.x();
-    if (typeof t2 == "function")
-      this.u = t2;
+    const t = this.x();
+    if (typeof t == "function")
+      this.u = t;
   } finally {
-    i2();
+    i();
   }
 };
 p.prototype.S = function() {
@@ -375,9 +375,9 @@ p.prototype.S = function() {
   _(this);
   l(this);
   r++;
-  const i2 = n;
+  const i = n;
   n = this;
-  return g.bind(this, i2);
+  return g.bind(this, i);
 };
 p.prototype.N = function() {
   if (!(2 & this.f)) {
@@ -394,23 +394,28 @@ p.prototype.d = function() {
 p.prototype.dispose = function() {
   this.d();
 };
-function E(i2, t2) {
-  const o = new p(i2, t2);
+function E(i, t) {
+  const o = new p(i, t);
   try {
     o.c();
-  } catch (i3) {
+  } catch (i) {
     o.d();
-    throw i3;
+    throw i;
   }
-  const n2 = o.d.bind(o);
-  n2[Symbol.dispose] = n2;
-  return n2;
+  const n = o.d.bind(o);
+  n[Symbol.dispose] = n;
+  return n;
 }
 
 // src/client.ts
-function createClient(url, options = {}) {
+function createClient2(url, options = {}) {
   const tokenKey = options.tokenKey ?? "seiro_token";
+  const eventIdKey = options.eventIdKey ?? `${tokenKey}_last_event_id`;
   let memoryToken = options.token ?? null;
+  let lastSeenId = null;
+  if (typeof localStorage !== "undefined") {
+    lastSeenId = localStorage.getItem(eventIdKey);
+  }
   let ws = null;
   let queryId = 0;
   const queryListeners = new Map;
@@ -419,6 +424,21 @@ function createClient(url, options = {}) {
   let connectPromise = null;
   const connected = d(false);
   let subscribed = false;
+  function gtBigint(a, b) {
+    try {
+      return BigInt(a) > BigInt(b);
+    } catch {
+      return a > b;
+    }
+  }
+  function advanceCursor(id) {
+    if (lastSeenId === null || gtBigint(id, lastSeenId)) {
+      lastSeenId = id;
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(eventIdKey, id);
+      }
+    }
+  }
   function getToken() {
     if (typeof localStorage !== "undefined") {
       return localStorage.getItem(tokenKey);
@@ -438,9 +458,9 @@ function createClient(url, options = {}) {
   function buildUrl() {
     const token = getToken();
     if (token) {
-      const u2 = new URL(url);
-      u2.searchParams.set("token", token);
-      return u2.toString();
+      const u = new URL(url);
+      u.searchParams.set("token", token);
+      return u.toString();
     }
     return url;
   }
@@ -451,21 +471,37 @@ function createClient(url, options = {}) {
       const socket = new WebSocket(buildUrl());
       ws = socket;
       let profileReceived = false;
-      socket.onerror = (e2) => reject(e2);
-      socket.onmessage = (e2) => {
-        const msg = decode(e2.data);
+      socket.onerror = (e) => reject(e);
+      socket.onmessage = (e) => {
+        const msg = decode2(e.data);
         if (!profileReceived && typeof msg === "object" && msg !== null && "profile" in msg) {
           profileReceived = true;
           connected.value = true;
           if (subscribed) {
             for (const pattern of eventListeners.keys()) {
-              send({ sub: pattern });
+              send(lastSeenId !== null ? { sub: pattern, since: lastSeenId } : { sub: pattern });
             }
           }
           resolve(msg.profile);
           return;
         }
-        if (isCmdResult(msg)) {
+        if (isEvent2(msg)) {
+          if (msg.id !== undefined) {
+            if (lastSeenId !== null && !gtBigint(msg.id, lastSeenId)) {
+              return;
+            }
+            advanceCursor(msg.id);
+          }
+          for (const [pattern, listeners] of eventListeners) {
+            if (matchPattern(pattern, msg.ev)) {
+              for (const listener of listeners) {
+                listener(msg.data);
+              }
+            }
+          }
+          return;
+        }
+        if (isCmdResult2(msg)) {
           const listener = cmdListeners.get(msg.cid);
           if (listener?.onSuccess) {
             listener.onSuccess(msg.result);
@@ -473,7 +509,7 @@ function createClient(url, options = {}) {
           cmdListeners.delete(msg.cid);
           return;
         }
-        if (isCmdError(msg)) {
+        if (isCmdError2(msg)) {
           const listener = cmdListeners.get(msg.cid);
           if (listener?.onError) {
             listener.onError(msg.err);
@@ -481,11 +517,11 @@ function createClient(url, options = {}) {
           cmdListeners.delete(msg.cid);
           return;
         }
-        if (isRow(msg)) {
+        if (isRow2(msg)) {
           queryListeners.get(msg.id)?.onRow(msg.row);
           return;
         }
-        if (isEnd(msg)) {
+        if (isEnd2(msg)) {
           queryListeners.get(msg.id)?.onEnd();
           queryListeners.delete(msg.id);
           return;
@@ -496,15 +532,6 @@ function createClient(url, options = {}) {
           queryListeners.delete(m.id);
           return;
         }
-        if (isEvent(msg)) {
-          for (const [pattern, listeners] of eventListeners) {
-            if (matchPattern(pattern, msg.ev)) {
-              for (const listener of listeners) {
-                listener(msg.data);
-              }
-            }
-          }
-        }
       };
       socket.onclose = () => {
         if (ws !== socket)
@@ -512,6 +539,7 @@ function createClient(url, options = {}) {
         ws = null;
         connectPromise = null;
         connected.value = false;
+        subscribed = false;
       };
     });
     return connectPromise;
@@ -525,10 +553,10 @@ function createClient(url, options = {}) {
     return false;
   }
   function send(data) {
-    ws?.send(encode(data));
+    ws?.send(encode2(data));
   }
   function cmd(name, data, callbacks) {
-    const id = cid();
+    const id = cid2();
     const ack = callbacks !== undefined;
     if (ack) {
       cmdListeners.set(id, {
@@ -555,8 +583,8 @@ function createClient(url, options = {}) {
             done = true;
             resolve?.();
           },
-          onError: (e2) => {
-            error = e2;
+          onError: (e) => {
+            error = e;
             resolve?.();
           }
         });
@@ -564,8 +592,8 @@ function createClient(url, options = {}) {
         return {
           async next() {
             while (buffer.length === 0 && !done && !error) {
-              await new Promise((r2) => {
-                resolve = r2;
+              await new Promise((r) => {
+                resolve = r;
               });
             }
             if (error)
@@ -609,7 +637,7 @@ function createClient(url, options = {}) {
     }
     eventListeners.get(pattern).add(listener);
     if (isNew && subscribed) {
-      send({ sub: pattern });
+      send(lastSeenId !== null ? { sub: pattern, since: lastSeenId } : { sub: pattern });
     }
     return () => {
       const listeners = eventListeners.get(pattern);
@@ -629,11 +657,15 @@ function createClient(url, options = {}) {
       return;
     subscribed = true;
     for (const pattern of eventListeners.keys()) {
-      send({ sub: pattern });
+      send(lastSeenId !== null ? { sub: pattern, since: lastSeenId } : { sub: pattern });
     }
   }
   function logout() {
     setToken(null);
+    lastSeenId = null;
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(eventIdKey);
+    }
   }
   function close() {
     ws?.close();
@@ -642,6 +674,9 @@ function createClient(url, options = {}) {
     close();
     connectPromise = null;
     await connect();
+  }
+  function getLastEventId() {
+    return lastSeenId;
   }
   return {
     connect,
@@ -656,9 +691,10 @@ function createClient(url, options = {}) {
     subscribe,
     setToken,
     getToken,
+    getLastEventId,
     logout,
     close
   };
 }
 
-export { d, w, E, createClient };
+export { d, w, E, createClient2 };

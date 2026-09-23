@@ -1,14 +1,14 @@
 // @bun
 import {
-  E,
-  createClient,
   d,
-  w
-} from "./index-kx54n5re.js";
-import"./index-txbk53zc.js";
+  w,
+  E,
+  createClient2
+} from "./index-zkz2z3n6.js";
+import"./index-qv3pb96h.js";
 export {
   w as computed,
-  createClient,
+  createClient2 as createClient,
   E as effect,
   d as signal
 };

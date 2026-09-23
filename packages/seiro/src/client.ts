@@ -27,9 +27,21 @@ export function createClient<
   C extends CommandsDef = CommandsDef,
   Q extends QueriesDef = QueriesDef,
   E extends EventsDef = EventsDef,
->(url: string, options: { tokenKey?: string; token?: string } = {}) {
+>(
+  url: string,
+  options: {
+    tokenKey?: string;
+    token?: string;
+    eventIdKey?: string;
+  } = {},
+) {
   const tokenKey = options.tokenKey ?? "seiro_token";
+  const eventIdKey = options.eventIdKey ?? `${tokenKey}_last_event_id`;
   let memoryToken: string | null = options.token ?? null;
+  let lastSeenId: string | null = null;
+  if (typeof localStorage !== "undefined") {
+    lastSeenId = localStorage.getItem(eventIdKey);
+  }
 
   let ws: WebSocket | null = null;
   let queryId = 0;
@@ -46,6 +58,23 @@ export function createClient<
 
   const connected = signal(false);
   let subscribed = false;
+
+  function gtBigint(a: string, b: string): boolean {
+    try {
+      return BigInt(a) > BigInt(b);
+    } catch {
+      return a > b;
+    }
+  }
+
+  function advanceCursor(id: string) {
+    if (lastSeenId === null || gtBigint(id, lastSeenId)) {
+      lastSeenId = id;
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(eventIdKey, id);
+      }
+    }
+  }
 
   function getToken(): string | null {
     if (typeof localStorage !== "undefined") {
@@ -97,13 +126,34 @@ export function createClient<
         ) {
           profileReceived = true;
           connected.value = true;
-          // Re-establish event subscriptions on a fresh socket (e.g. after reconnect)
+          // Re-establish event subscriptions on a fresh socket (e.g. after
+          // reconnect), resuming from the last event seen as subscribe() does,
+          // so nothing sent while the socket was changing is missed.
           if (subscribed) {
             for (const pattern of eventListeners.keys()) {
-              send({ sub: pattern });
+              send(lastSeenId !== null ? { sub: pattern, since: lastSeenId } : { sub: pattern });
             }
           }
           resolve((msg as { profile: P | null }).profile);
+          return;
+        }
+
+        // Check isEvent before isRow/isEnd -- events now carry an id field
+        // (the events-log row id) which would otherwise match isEnd.
+        if (isEvent(msg)) {
+          if (msg.id !== undefined) {
+            if (lastSeenId !== null && !gtBigint(msg.id, lastSeenId)) {
+              return;
+            }
+            advanceCursor(msg.id);
+          }
+          for (const [pattern, listeners] of eventListeners) {
+            if (matchPattern(pattern, msg.ev)) {
+              for (const listener of listeners) {
+                listener(msg.data);
+              }
+            }
+          }
           return;
         }
 
@@ -147,16 +197,6 @@ export function createClient<
           queryListeners.delete(m.id);
           return;
         }
-
-        if (isEvent(msg)) {
-          for (const [pattern, listeners] of eventListeners) {
-            if (matchPattern(pattern, msg.ev)) {
-              for (const listener of listeners) {
-                listener(msg.data);
-              }
-            }
-          }
-        }
       };
 
       socket.onclose = () => {
@@ -165,6 +205,9 @@ export function createClient<
         ws = null;
         connectPromise = null;
         connected.value = false;
+        // Next subscribe() must resend subs -- with the current lastSeenId --
+        // so the server can backfill anything missed while disconnected.
+        subscribed = false;
       };
     });
 
@@ -304,7 +347,11 @@ export function createClient<
 
     // Send sub if already subscribed (i.e., after auth)
     if (isNew && subscribed) {
-      send({ sub: pattern });
+      send(
+        lastSeenId !== null
+          ? { sub: pattern, since: lastSeenId }
+          : { sub: pattern },
+      );
     }
 
     return () => {
@@ -325,12 +372,20 @@ export function createClient<
     if (subscribed) return;
     subscribed = true;
     for (const pattern of eventListeners.keys()) {
-      send({ sub: pattern });
+      send(
+        lastSeenId !== null
+          ? { sub: pattern, since: lastSeenId }
+          : { sub: pattern },
+      );
     }
   }
 
   function logout() {
     setToken(null);
+    lastSeenId = null;
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(eventIdKey);
+    }
   }
 
   function close() {
@@ -341,6 +396,10 @@ export function createClient<
     close();
     connectPromise = null;
     await connect();
+  }
+
+  function getLastEventId(): string | null {
+    return lastSeenId;
   }
 
   return {
@@ -356,6 +415,7 @@ export function createClient<
     subscribe,
     setToken,
     getToken,
+    getLastEventId,
     logout,
     close,
   };
