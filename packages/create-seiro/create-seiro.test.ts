@@ -54,6 +54,6 @@ test("scaffolded project has seiro dependency", async () => {
 });
 
 test("scaffolded project type checks", async () => {
-  const result = await $`cd ${projectDir} && bun run check`.quiet().nothrow();
+  const result = await $`cd ${projectDir} && bun check`.quiet().nothrow();
   expect(result.exitCode).toBe(0);
 }, 30000);

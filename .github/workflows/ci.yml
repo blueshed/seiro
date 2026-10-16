@@ -22,11 +22,14 @@ jobs:
       - name: Build seiro
         run: cd packages/seiro && bun run build
 
+      - name: Type check seiro and create-seiro
+        run: bun check
+
       - name: Type check template
-        run: cd template && bun run check
+        run: cd template && bun check
 
       - name: Type check example
-        run: cd example && bun run check
+        run: cd example && bun check
 
       - name: Test create-seiro
         run: cd packages/create-seiro && bun test

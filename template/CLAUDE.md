@@ -7,7 +7,7 @@ CQRS over WebSocket. Bun + Preact Signals + Web Components.
 ```bash
 docker compose up -d   # start database
 bun run dev            # server on :3000
-bun run check          # typecheck
+bun check              # typecheck
 bun test               # run tests
 ```
 

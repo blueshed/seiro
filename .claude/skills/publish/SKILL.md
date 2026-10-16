@@ -113,7 +113,7 @@ npm view create-seiro version
 rm -rf /tmp/test-publish
 BUN_INSTALL_CACHE_DIR=$(mktemp -d) bunx create-seiro@X.Y.Z /tmp/test-publish \
   && grep -F '"seiro": "^X.Y.Z"' /tmp/test-publish/package.json \
-  && (cd /tmp/test-publish && bun run check) \
+  && (cd /tmp/test-publish && bun check) \
   && echo "PUBLISH OK"
 ```
 
