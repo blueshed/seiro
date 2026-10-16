@@ -4,7 +4,6 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot server.ts",
-    "check": "tsc --noEmit",
     "db": "docker compose down -v && docker compose up -d",
     "down": "docker compose down -v",
     "test": "bun test server.test.ts"

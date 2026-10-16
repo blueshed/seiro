@@ -22,7 +22,7 @@ bun run build            # Build seiro core library
 
 # In template/ or example/
 bun run dev              # Start dev server
-bun run check            # Type check
+bun check                # Type check
 bun test                 # Run tests
 ```
 
